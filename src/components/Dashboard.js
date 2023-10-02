@@ -70,7 +70,7 @@ function App() {
                 const os = device.device.operating_system.toLowerCase();
                 if (os.includes('android')) {
                     androidCount++;
-                } else if (os.includes('iphone')) {
+                } else if (os.includes('ios')) {
                     iPhoneCount++;
                 } else {
                     otherCount++;
@@ -86,7 +86,7 @@ function App() {
     };
 
     const createMobileOSChart = (counts) => {
-        const labels = ['Android', 'iPhone', 'Other'];
+        const labels = ['Android', 'IOS', 'Other'];
         const dataValues = [counts.Android, counts.iPhone, counts.Other];
 
         return {
