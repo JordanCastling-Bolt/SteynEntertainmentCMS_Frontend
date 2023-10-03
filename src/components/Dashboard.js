@@ -93,7 +93,7 @@ function App() {
             labels: labels,
             datasets: [
                 {
-                    label: 'Number of Users',
+                    label: 'Number of Devices',
                     data: dataValues,
                     backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 205, 86, 0.6)'],
                     borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 205, 86, 1)'],
@@ -144,7 +144,7 @@ function App() {
             labels: labels,
             datasets: [
                 {
-                    label: 'Number of Users by Country',
+                    label: 'Number of Devices by Country',
                     data: dataValues,
                     backgroundColor: 'rgba(54, 162, 235, 0.6)',
                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -166,7 +166,7 @@ function App() {
                 <canvas id="geoChart"></canvas>
             </div>
 
-            <p>Total Users: {userCount}</p>
+            <p>Total Devices: {userCount}</p>
         </div>
     );
 }
