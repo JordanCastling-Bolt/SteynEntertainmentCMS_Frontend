@@ -1,55 +1,71 @@
-/* Add this CSS to your Dashboard.css or App.css file */
+/* Updated CSS */
 .App {
-    text-align: center;
-    padding: 20px;
-    background-color: #f8f8f8;
-    font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 20px;
 }
 
-h1 {
-    color: #333;
-    font-size: 36px;
-    font-weight: bold;
-    margin-bottom: 20px;
+.Dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 20px;
 }
 
-h2 {
-    color: #555;
-    font-size: 24px;
-    font-weight: bold;
-    margin-top: 40px;
-    margin-bottom: 20px;
+.Dashboard div {
+  background-color: #fff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  width: calc(33.333% - 40px); /* For three charts in a row */
+  transition: all 0.3s ease-in-out;
 }
 
-.ChartContainer {
-    background-color: #fff;
-    border-radius: 8px;
-    margin: 0 auto 20px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.Dashboard div:hover {
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
 }
 
-.ChartContainer canvas {
-    max-width: 100%;
-    height: 50%;
+.App-loading,
+.App-error {
+  font-size: 24px;
+  color: #d9534f;
+  margin-top: 50px;
 }
 
-.Line {
-    background-color: #fff;
-    border-radius: 8px;
-    margin: 10px auto;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.chart-section,
+.kpi-section {
+  margin-top: 40px;
+  padding: 20px;
 }
 
-.Line canvas {
-    max-width: 100%;
-    height: auto;
+.chart-container {
+  margin: auto;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .Line {
-        width: 90%;
-    }
+.chart-section h2,
+.kpi-section h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.kpi-box {
+  background-color: #fff;
+  display: inline-block;
+  margin: 20px;
+  padding: 30px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-number {
+  font-size: 48px;
+  font-weight: bold;
+}
+
+.kpi-label {
+  display: block;
+  font-size: 18px;
+  margin-top: 10px;
 }

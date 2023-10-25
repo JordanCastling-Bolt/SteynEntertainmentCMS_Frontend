@@ -110,7 +110,7 @@ const Events = () => {
   const fetchMoreEvents = async () => {
     if (!lastVisible) return;  // Make sure lastVisible is available
 
-    const next = query(collection(db, 'Events'), orderBy('name'), startAfter(lastVisible), limit(PAGE_SIZE));
+    const next = query(collection(db, 'Events'), orderBy('title'), startAfter(lastVisible), limit(PAGE_SIZE));
     const eventsSnapshot = await getDocs(next);
     const newEvents = eventsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
     setEvents(prevEvents => [...prevEvents, ...newEvents]);
@@ -161,13 +161,13 @@ const Events = () => {
       <ul>
         {events.map(event => (
           <li key={event.id}>
-            {event.imageUrl && <img src={event.imageUrl} alt={event.name} />}
+            {event.imageUrl && <img src={event.imageUrl} alt={event.title} />}
             {editingId === event.id ? (
               <div>
                 <label>
                   Name:
                   <input
-                    defaultValue={event.name}
+                    defaultValue={event.title}
                     onChange={e => setEditName(e.target.value)}
                   />
                 </label>

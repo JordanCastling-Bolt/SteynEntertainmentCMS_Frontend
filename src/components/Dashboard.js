@@ -1,172 +1,178 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import Chart from 'chart.js/auto';
+import './style/Dashboard.css';
+
 
 function App() {
-    const [deviceData, setDeviceData] = useState([]);
-    const [userCount, setUserCount] = useState(0); // Track the total number of users
-    const [chart1, setChart1] = useState(null); // Chart for mobile OS
-    const [chart2, setChart2] = useState(null); // Chart for user geo data
+    const [data, setData] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    const chartRefs = useRef({
+        mobile: React.createRef(),
+        geo: React.createRef(),
+        userEngagement: React.createRef(),
+        user: React.createRef(),
+        technology: React.createRef(),
+        acquisition: React.createRef(),
+        behaviorFlow: React.createRef(),
+        userActivityOverTime: React.createRef(),
+        userRetention: React.createRef(),
+        eventPopularity: React.createRef(),
+        trafficSourceAnalysis: React.createRef()
+    });
+
+    const chartInstances = useRef({});
 
     useEffect(() => {
-        const fetchData = async () => {
+        async function loadData() {
+            setIsLoading(true);
             try {
-                // Make an HTTP request to your Express server's endpoint for device data
-                const result = await axios.get('http://localhost:3001/api/kpi/mobile');
-                const data = result.data.mobile;
-
-                // Count the data based on the operating_system field
-                const counts = countOperatingSystems(data);
-
-                // Set the device data and user count to the state
-                setDeviceData(counts);
-                setUserCount(data.length);
-
-                // Create the chart data based on the counts
-                const chartData1 = createMobileOSChart(counts);
-                const chartData2 = await fetchGeoData(); // Fetch geo data and create chart data
-
-                if (chart1) {
-                    chart1.data = chartData1;
-                    chart1.update();
-                } else {
-                    const ctx1 = document.getElementById('mobileOSChart').getContext('2d');
-                    const newChart1 = new Chart(ctx1, {
-                        type: 'bar',
-                        data: chartData1,
-                        // Add chart options as needed
-                    });
-                    setChart1(newChart1);
-                }
-
-                if (chart2) {
-                    chart2.data = chartData2;
-                    chart2.update();
-                } else {
-                    const ctx2 = document.getElementById('geoChart').getContext('2d');
-                    const newChart2 = new Chart(ctx2, {
-                        type: 'bar',
-                        data: chartData2,
-                        // Add chart options as needed
-                    });
-                    setChart2(newChart2);
-                }
-
+                const endpoints = Object.keys(chartRefs.current);
+                const fetchedData = await Promise.all(endpoints.map(endpoint => axios.get(`http://localhost:3001/api/kpi/${endpoint}`)));
+                const newData = endpoints.reduce((acc, endpoint, index) => {
+                    acc[endpoint] = fetchedData[index].data;
+                    return acc;
+                }, {});
+                setData(newData);
             } catch (error) {
-                console.error('There was a problem fetching data:', error);
+                console.error('Error fetching data:', error);
+                setHasError(true);
+            } finally {
+                setIsLoading(false);
             }
-        };
-        fetchData();
-    }, []);
-
-    const countOperatingSystems = (data) => {
-        // Count operating systems
-        let androidCount = 0;
-        let iPhoneCount = 0;
-        let otherCount = 0;
-
-        data.forEach((device) => {
-            if (device && device.device && device.device.operating_system) {
-                const os = device.device.operating_system.toLowerCase();
-                if (os.includes('android')) {
-                    androidCount++;
-                } else if (os.includes('ios')) {
-                    iPhoneCount++;
-                } else {
-                    otherCount++;
-                }
-            }
-        });
-
-        return {
-            Android: androidCount,
-            iPhone: iPhoneCount,
-            Other: otherCount,
-        };
-    };
-
-    const createMobileOSChart = (counts) => {
-        const labels = ['Android', 'IOS', 'Other'];
-        const dataValues = [counts.Android, counts.iPhone, counts.Other];
-
-        return {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Number of Devices',
-                    data: dataValues,
-                    backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 205, 86, 0.6)'],
-                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 205, 86, 1)'],
-                    borderWidth: 1,
-                },
-            ],
-        };
-    };
-
-    const fetchGeoData = async () => {
-        try {
-            // Make an HTTP request to your Express server's endpoint for geo data
-            const result = await axios.get('http://localhost:3001/api/kpi/geo');
-            const geoData = result.data.geo;
-    
-            // Process and create chart data based on geo data
-            const chartData = processGeoData(geoData);
-    
-            return chartData;
-        } catch (error) {
-            console.error('Error fetching geo data:', error);
-            return null;
         }
-    };
-    
-    const processGeoData = (geoData) => {
-        // Initialize an empty object to store the counts of users per country
-        const countryCounts = {};
-    
-        // Iterate through geoData and count the number of occurrences of each country
-        geoData.forEach((data) => {
-            if (data && data.geo && data.geo.country) { // Adjusted to read country from 'geo' field
-                const country = data.geo.country; // Adjusted to read country from 'geo' field
-                if (countryCounts[country]) {
-                    countryCounts[country] += 1;
-                } else {
-                    countryCounts[country] = 1;
-                }
-            }
+
+        loadData();
+    }, [chartRefs]);
+
+    useEffect(() => {
+        // Destroy previous Chart instances
+        Object.keys(chartInstances.current).forEach(key => {
+            chartInstances.current[key]?.destroy();
         });
-    
-        // Convert the keys and values in the countryCounts object into arrays for charting
-        const labels = Object.keys(countryCounts);
-        const dataValues = Object.values(countryCounts);
-    
-        // Return the data in a format compatible with Chart.js
-        return {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Number of Devices by Country',
-                    data: dataValues,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                },
-            ],
-        };
-    };
-    
+
+        const userData = data.user || []; // assuming 'user' key has user data
+        const mobileData = data.mobile || []; // assuming 'mobile' key has mobile data
+
+        const activeUsersCount = userData.filter(user => user.is_active_user).length;
+        const totalUsersCount = userData.length;
+        const activeUsersPercentage = (activeUsersCount / totalUsersCount) * 100;
+        const osCounts = mobileData.reduce((accumulator, entry) => {
+            const os = entry.operating_system;
+            accumulator[os] = (accumulator[os] || 0) + 1;
+            return accumulator;
+        }, {});
+
+        const countryCounts = (data.geo || []).reduce((acc, entry) => {
+            const country = entry.geo.country;
+            acc[country] = (acc[country] || 0) + 1;
+            return acc;
+        }, {});
+
+        if (!isLoading && data) {
+            Object.entries(data).forEach(([key, value]) => {
+                let chartConfig = {};
+
+                // Check if value is not an array and log the problematic key
+                if (!Array.isArray(value)) {
+                    console.warn(`Value for key ${key} is not an array:`, value);
+                    return; // Skip this iteration if value is not an array
+                }
+
+                switch (key) {
+                    case "userEngagement":
+                        chartConfig = {
+                            type: 'bar',
+                            data: {
+                                labels: value.map(d => d.event_name),
+                                datasets: [{
+                                    label: 'Event Count',
+                                    data: value.map(d => d.event_count),
+                                    backgroundColor: 'blue'
+                                }]
+                            }
+                        };
+                        break;
+                    case "userActivityOverTime":
+                        chartConfig = {
+                            type: 'line',
+                            data: {
+                                labels: value.map(d => (d.date ? d.date.value : null) || d.date),
+                                datasets: [{
+                                    label: key,
+                                    data: value.map(d => d.user_count || d.retained_users),
+                                    backgroundColor: 'blue'
+                                }]
+                            }
+                        };
+                        break;
+                    case "mobile":
+                        chartConfig = {
+                            type: 'pie',
+                            data: {
+                                labels: Object.keys(osCounts),
+                                datasets: [{
+                                    data: Object.values(osCounts),
+                                    backgroundColor: [
+                                        // Add as many colors as required or generate dynamically
+                                        'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
+                                    ]
+                                }]
+                            }
+                        };
+                        break;
+                    case "geo":
+                        chartConfig = {
+                            type: 'bar',
+                            data: {
+                                labels: Object.keys(countryCounts),
+                                datasets: [{
+                                    label: 'Number of Users',
+                                    data: Object.values(countryCounts),
+                                    backgroundColor: 'blue'
+                                }]
+                            }
+                        };
+                        break;
+                        case "user":
+                            chartConfig = {
+                              type: 'doughnut',
+                              data: {
+                                labels: ['Active Users', 'Inactive Users'],
+                                datasets: [{
+                                  data: [activeUsersCount, totalUsersCount - activeUsersCount],
+                                  backgroundColor: ['green', 'grey']
+                                }]
+                              },
+                              options: {
+                                title: {
+                                  display: true,
+                                  text: `Active Users: ${activeUsersPercentage.toFixed(2)}%`
+                                }
+                              }
+                            };
+                            break;
+                    // For simplicity, other KPIs can be processed in a similar manner.
+                    // Additional cases can be added based on KPI data structure.
+                }
+
+                if (Object.keys(chartConfig).length) {
+                    chartInstances.current[key] = new Chart(chartRefs.current[key].current, chartConfig);
+                }
+            });
+        }
+    }, [isLoading, data]);
+
     return (
-        <div className="App">
-            <h1>Analytics Dashboard</h1>
-
-            <div className="chart-container">
-                <canvas id="mobileOSChart"></canvas>
-            </div>
-
-            <div className="chart-container">
-                <canvas id="geoChart"></canvas>
-            </div>
-
-            <p>Total Devices: {userCount}</p>
+        <div className="Dashboard">
+            {hasError ? <div>Error occurred while fetching data. Please try again later.</div> :
+                Object.entries(chartRefs.current).map(([key, ref]) => (
+                    <div key={key} style={{ width: '300px', height: '300px', margin: '20px' }}>
+                        <canvas ref={ref}></canvas>
+                    </div>
+                ))}
         </div>
     );
 }
