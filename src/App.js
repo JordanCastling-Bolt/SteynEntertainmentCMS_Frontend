@@ -6,6 +6,7 @@ import Events from './components/Events';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import Dashboard from './components/Dashboard';
+import Visuals from './components/Visuals';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -76,8 +77,7 @@ function App() {
         {activeSection === 'Visuals' && (
           <section className="visuals">
             <h2>Visuals</h2>
-            
-            {/* You can render a Visuals component here if you have one */}
+            <Visuals/>
           </section>
         )}
       </main>
