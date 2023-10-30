@@ -1,35 +1,44 @@
 /* Specific to Events component */
 .events-container {
-    max-width: 800px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    max-width: 100%;
     margin: 20px auto;
     padding: 20px;
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.events-container .feedback {
+  }
+  
+  /* For Feedback Message */
+  .events-container .feedback {
     margin-bottom: 20px;
     padding: 10px;
     border-radius: 5px;
     background-color: #e6f7ff;
     border: 1px solid #b3daff;
     color: #0056b3;
-}
-
-.events-container form {
+  }
+  
+  /* For Forms */
+  .events-container form {
+    flex: 1;
     margin-bottom: 30px;
-}
-
-.events-container label {
+  }
+  
+  /* For Labels */
+  .events-container label {
     display: block;
     margin-bottom: 10px;
-}
-
-.events-container input[type="text"],
-.events-container input[type="file"],
-.events-container textarea,
-.events-container button {
+  }
+  
+  /* For Input Fields and Buttons */
+  .events-container input[type="text"],
+  .events-container input[type="file"],
+  .events-container textarea,
+  .events-container select,
+  .events-container button {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
@@ -37,37 +46,45 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
-}
-
-.events-container button {
+  }
+  
+  /* For Buttons */
+  .events-container button {
     cursor: pointer;
     background-color: #007bff;
     color: #fff;
-}
-
-.events-container button:hover {
+  }
+  
+  /* Button Hover State */
+  .events-container button:hover {
     background-color: #0056b3;
-}
-
-.events-container ul {
+  }
+  
+  /* For Unordered Lists */
+  .events-container ul {
+    flex: 1;
     list-style: none;
     padding: 0;
-}
-
-.events-container li {
+  }
+  
+  /* For List Items */
+  .events-container li {
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
     margin-bottom: 20px;
-}
-
-.events-container img {
+  }
+  
+  /* For Images */
+  .events-container img {
     max-width: 200px;
     max-height: 200px;
     border-radius: 5px;
     margin-bottom: 15px;
-}
-
-.events-container h3 {
+  }
+  
+  /* For Headings */
+  .events-container h3 {
     margin-top: 0;
-}
+  }
+  

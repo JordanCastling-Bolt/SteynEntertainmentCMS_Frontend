@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Steyn CMS",
+  "name": "Analyze and manage content for the Steyn Entertainment Mobile App",
   "icons": [
     {
       "src": "favicon.ico",

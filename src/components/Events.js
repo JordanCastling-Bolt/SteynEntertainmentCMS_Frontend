@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { addDoc, collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, limit, startAfter } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
-import './style/Events.css';
+import styles from './style/Events.module.css';
 
 const PAGE_SIZE = 1;
 
@@ -173,145 +173,75 @@ const Events = () => {
   };
 
   return (
-    <div className='events-container'>
-      {feedback && <div>{feedback}</div>}
-      <form onSubmit={handleAddEvent}>
-        <label>
-          Event Name:
-          <input
-            value={eventName}
-            onChange={e => setEventName(e.target.value)}
-            placeholder="Event name"
-          />
-        </label>
-        <br />
-        <label>
-          Event Description:
-          <textarea
-            value={eventDescription}
-            onChange={e => setEventDescription(e.target.value)}
-            placeholder="Event description"
-          />
-        </label>
-        <br />
-        <label>
-          Event Image:
-          <input type="file" onChange={e => setEventImage(e.target.files[0])} />
-        </label>
-        <br />
-        <label>
-          <select value={eventCategory} onChange={e => setEventCategory(e.target.value)}>
-            <option value="">Select Category</option>
-            <option value="eventsAndTouring">Events and Touring</option>
-            <option value="rockingTheDaisies">Rocking the Daisies</option>
-            <option value="inTheCity">In the City</option>
-          </select>
-        </label>
-        <br />
-        <label>
-          Date:
-          <input
-            type="date" 
-            onChange={e => setEventDate(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Event URL:
-          <input
-            value={eventUrl}
-            onChange={e => setEventUrl(e.target.value)}
-            placeholder="Event URL"
-          />
-        </label>
-        <br />
-        <button type="submit">Add Event</button>
-      </form>
-      <ul>
-        {events.map(event => (
-          <li key={event.id}>
-            {event.picture && <img src={event.picture} alt={event.title} />}
-            {editingId === event.id ? (
-              <div>
-                <label>
-                  Event Name:
-                  <input
-                    defaultValue={event.title}
-                    onChange={e => setEditName(e.target.value)}
-                    placeholder="Event name"
-                  />
-                </label>
-                <br />
-                <label>
-                  Event Description:
-                  <textarea
-                    defaultValue={event.description}
-                    onChange={e => setEditDescription(e.target.value)}
-                    placeholder="Event description"
-                  />
-                </label>
-                <br />
-                <label>
-                  Event Image:
-                  <input type="file" onChange={e => setEditImage(e.target.files[0])} />
-                </label>
-                <br />
-                <label>
-                  Date:
-                  <input
-                    type="date"  // Making it a date picker
-                    defaultValue={event.date}
-                    onChange={e => setEditDate(e.target.value)}
-                  />
-                </label>
-                <br />
-                <label>
-                  URL:
-                  <input
-                    defaultValue={event.url}
-                    onChange={e => setEditUrl(e.target.value)}
-                  />
-                </label>
-                <br />
-                <label>
-                  Category:
-                  <select
-                    defaultValue={event.category}
-                    onChange={e => setEditCategory(e.target.value)}
-                  >
-                    <option value="">Select Category</option>
-                    <option value="eventsAndTouring">Events and Touring</option>
-                    <option value="rockingTheDaisies">Rocking the Daisies</option>
-                    <option value="inTheCity">In the City</option>
-                  </select>
-                </label>
-                <br />
-                <button onClick={() => handleUpdateEvent(event.id)}>Save</button>
-                <button onClick={() => setEditingId(null)}>Cancel</button>
-              </div>
-            ) : (
-              <div>
-                <h3>{event.title}</h3>
-                <p>{event.description}</p>
-                <p>Date: {event.date}</p>
-                <p>URL: {event.url}</p>
-                <p>Category: {event.category}</p>
-                <button onClick={() => {
-                  setEditName(event.title);
-                  setEditDescription(event.description);
-                  setEditDate(event.date); // Initialize editing date
-                  setEditUrl(event.url); // Initialize editing URL
-                  setEditCategory(event.category); // Initialize editing category
-                  setEditingId(event.id);
-                }}>Edit</button>
-                <button onClick={() => handleDeleteEvent(event.id)}>Delete</button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-      <button onClick={fetchMoreEvents}>Load More</button>
+    <div className= {styles['events-container']}>
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+
+        {/* Left Column for Existing Events */}
+        <div style={{ flex: 1 }}>
+          {feedback && <div>{feedback}</div>}
+          <ul>
+            {events.map((event, index) => (
+              <li key={index}>
+                {event.picture && <img src={event.picture} alt={event.title} />}
+                {editingId === event.id ? (
+                  <div>
+                    <input type="text" value={editName} onChange={e => setEditName(e.target.value)} />
+                    <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)}></textarea>
+                    <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} />
+                    <input type="url" value={editUrl} onChange={e => setEditUrl(e.target.value)} />
+                    <select value={editCategory} onChange={e => setEditCategory(e.target.value)}>
+                      <option value="">Select Category</option>
+                      <option value="eventsAndTouring">Events and Touring</option>
+                      <option value="rockingTheDaisies">Rocking the Daisies</option>
+                      <option value="inTheCity">In the City</option>
+                    </select>
+                    <button onClick={() => handleUpdateEvent(event.id)}>Save</button>
+                    <button onClick={() => setEditingId(null)}>Cancel</button>
+                  </div>
+                ) : (
+                  <div>
+                    <h3>{event.title}</h3>
+                    <p>{event.description}</p>
+                    <p>Date: {event.date}</p>
+                    <p>URL: {event.url}</p>
+                    <p>Category: {event.category}</p>
+                    <button onClick={() => {
+                      setEditName(event.title);
+                      setEditDescription(event.description);
+                      setEditDate(event.date);
+                      setEditUrl(event.url);
+                      setEditCategory(event.category);
+                      setEditingId(event.id);
+                    }}>Edit</button>
+                    <button onClick={() => handleDeleteEvent(event.id)}>Delete</button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          <button onClick={fetchMoreEvents}>Load More</button>
+        </div>
+
+        {/* Right Column for Adding New Event */}
+        <div style={{ flex: 1 }}>
+          <form onSubmit={handleAddEvent}>
+            <input type="text" placeholder="Event Name" value={eventName} onChange={e => setEventName(e.target.value)} />
+            <textarea placeholder="Description" value={eventDescription} onChange={e => setEventDescription(e.target.value)}></textarea>
+            <input type="date" placeholder="Date" value={eventDate} onChange={e => setEventDate(e.target.value)} />
+            <input type="url" placeholder="URL" value={eventUrl} onChange={e => setEventUrl(e.target.value)} />
+            <input type="file" onChange={e => setEventImage(e.target.files[0])} />
+            <select placeholder="Category" value={eventCategory} onChange={e => setEventCategory(e.target.value)}>
+              <option value="">Select Category</option>
+              <option value="eventsAndTouring">Events and Touring</option>
+              <option value="rockingTheDaisies">Rocking the Daisies</option>
+              <option value="inTheCity">In the City</option>
+            </select>
+            <button type="submit">Add Event</button>
+          </form>
+        </div>
+      </div>
     </div>
   );
+
 }
 export default Events;

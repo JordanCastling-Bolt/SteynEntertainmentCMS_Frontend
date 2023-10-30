@@ -43,14 +43,6 @@ body {
   background-color: #f5f7fa;
 }
 
-.articles, .events {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
 h2 {
   margin-top: 0;
 }

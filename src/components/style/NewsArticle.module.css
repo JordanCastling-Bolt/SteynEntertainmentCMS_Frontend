@@ -1,0 +1,113 @@
+.news-article-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+.left-column, .right-column {
+    flex: 1;
+    padding: 0 20px;
+}
+
+.news-article-container h2 {
+    font-size: 28px;
+    margin-bottom: 25px;
+    font-weight: 600;
+    color: #333;
+}
+
+.news-article-container input[type="text"],
+.news-article-container input[type="file"],
+.news-article-container button {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.news-article-container button {
+    cursor: pointer;
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    transition: background-color 0.3s;
+    font-weight: 600;
+}
+
+.news-article-container button:hover {
+    background-color: #357ab7;
+}
+
+.news-article-container img {
+    max-width: 200px;
+    height: auto;
+    margin-top: 20px;
+    border-radius: 8px;
+}
+
+.news-article-container h4 {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #444;
+}
+
+.news-article-container .ql-editor {
+    min-height: 250px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.news-article-container form {
+    margin-bottom: 30px;
+}
+
+/* For Labels */
+.news-article-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+/* For Textarea */
+.news-article-container textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* For Select Boxes */
+.news-article-container select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* For Checkboxes and Radios */
+.news-article-container input[type="checkbox"],
+.news-article-container input[type="radio"] {
+    margin-right: 5px;
+}
+
+/* For Checkbox and Radio Labels */
+.news-article-container .checkbox-label,
+.news-article-container .radio-label {
+    margin-right: 15px;
+}
