@@ -3,33 +3,41 @@ import logo from './logo.svg';
 import './App.css';
 import NewsArticle from './components/NewsArticle';
 import Events from './components/Events';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { getFirestore, doc, getDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 import Dashboard from './components/Dashboard';
 import Visuals from './components/Visuals';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [userName, setUserName] = useState(null);  // state to hold the user's name from Firestore
+  const [userName, setUserName] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState('Dashboard');  // State to manage which section is active
+  const [activeSection, setActiveSection] = useState('Dashboard');
+  const [allUsers, setAllUsers] = useState([]);  // New state to hold all users
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
 
-
+  // Fetch current user and all other users
   useEffect(() => {
     const auth = getAuth();
+    const db = getFirestore();
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
-        const db = getFirestore();
         const userDocRef = doc(db, 'Users', currentUser.uid);
         const userDoc = await getDoc(userDocRef);
-        console.log(process.env.GOOGLEANALYTICS_CREDS);
+
         if (userDoc.exists()) {
           const userData = userDoc.data();
           const fullName = `${userData.firstName} ${userData.lastName}`;
           setUserName(fullName);
         }
+
+        const usersCollection = collection(db, 'Users');
+        const userSnapshot = await getDocs(usersCollection);
+        const usersList = userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        setAllUsers(usersList);
       }
 
       setLoading(false);
@@ -37,13 +45,39 @@ function App() {
 
     return () => unsubscribe();
   }, []);
+  const auth = getAuth();
+  const handleLogout = () => {
+    signOut(auth).then(() => {
+      setUser(null);
+      navigate('/login')
+    });
+  };
+
+  const updateRole = async (uid, newRole) => {  // Function to update user role in Firestore
+    const db = getFirestore();
+    const userRef = doc(db, 'Users', uid);
+    await updateDoc(userRef, {
+      role: newRole
+    });
+  };
+
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div>
+        Please sign in to access the content.
+        <button onClick={() => navigate('/login')}>Login</button> 
+      </div>
+    );
+  }
+
+  const filteredUsers = allUsers.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (loading) {
     return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <div>Please sign in to access the content.</div>;
   }
   
   return (
@@ -52,12 +86,15 @@ function App() {
         <div className="user-info">
           <img src={logo} alt="Logo" className="sidebar-logo" /> 
           <p>Welcome, {userName || user.email}!</p>
+          {user && <button onClick={handleLogout}>Logout</button>}
         </div>
         <ul>
           <li onClick={() => setActiveSection('Dashboard')}>Dashboard</li>
           <li onClick={() => setActiveSection('Articles')}>Articles</li>
           <li onClick={() => setActiveSection('Events')}>Events</li>
           <li onClick={() => setActiveSection('Visuals')}>Visuals</li>
+          <li onClick={() => setActiveSection('ManageRoles')}>Manage Roles</li>
+
         </ul>
       </aside>
       <main className="main-content">
@@ -78,6 +115,26 @@ function App() {
           <section className="visuals">
             <h2>Visuals</h2>
             <Visuals/>
+          </section>
+          )}
+          {activeSection === 'ManageRoles' && (  // New section for role management
+          <section className="manage-roles">
+            <h2>Manage Roles</h2>
+            <input
+              type="text"
+              placeholder="Search by email"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)} // Updating the search term
+            />
+            <ul>
+              {filteredUsers.map(u => (
+                <li key={u.id}>
+                  {u.email} - {u.role}
+                  <button onClick={() => updateRole(u.id, 'admin')}>Make Admin</button>
+                  <button onClick={() => updateRole(u.id, 'user')}>Make User</button>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
       </main>
