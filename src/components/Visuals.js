@@ -3,21 +3,26 @@ import { uploadBytesResumable, getDownloadURL, ref, getStorage, listAll } from '
 import { db } from '../firebase';
 import { storage } from '../firebase';
 import { addDoc, collection, getDocs, query, orderBy, limit, startAfter, where, deleteDoc, doc } from 'firebase/firestore';
-import './style/Visuals.css';
+import styles from './style/Visuals.module.css';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
-const PAGE_SIZE = 1;
+
+const PAGE_SIZE = 3;
 
 const Visuals = () => {
     const [visuals, setVisuals] = useState([]);
     const [visualTitle, setVisualTitle] = useState('');
     const [visualCategory, setVisualCategory] = useState('');
-    const [visualFile, setVisualFile] = useState(null);
+    const [visualFiles, setVisualFiles] = useState(null);
     const [feedback, setFeedback] = useState('');
     const [lastVisible, setLastVisible] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [events, setEvents] = useState([]);
     const filteredEvents = events.filter(event => event.category === visualCategory);
+    const [currentVisualIndex, setCurrentVisualIndex] = useState(0);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -58,6 +63,14 @@ const Visuals = () => {
         fetchVisuals();
     }, [selectedEvent, visualCategory]);
 
+    const nextVisual = () => {
+        setCurrentVisualIndex(prevIndex => (prevIndex + 1) % visuals.length);
+    }
+
+    const prevVisual = () => {
+        setCurrentVisualIndex(prevIndex => (prevIndex - 1 + visuals.length) % visuals.length);
+    }
+
     const handleEventChange = (e) => {
         if (!visualCategory) {
             setFeedback('Please select a category first.');
@@ -67,6 +80,7 @@ const Visuals = () => {
         const selectedEvent = events.find(event => event.id === selectedEventId);
         setSelectedEvent(selectedEvent);
     };
+
     const handleAddVisual = async (e) => {
         e.preventDefault();
         if (!visualCategory.trim() || !selectedEvent) {
@@ -76,33 +90,35 @@ const Visuals = () => {
         const title = visualTitle;
         const category = visualCategory;
 
-        if (visualFile) {
-            const storageRef = ref(storage, `visuals/${selectedEvent.id}/${category}/${visualFile.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, visualFile);
+        if (visualFiles && visualFiles.length > 0) {
+            for (let i = 0; i < visualFiles.length; i++) {
+                const visualFile = visualFiles[i];
+                const storageRef = ref(storage, `visuals/${selectedEvent.id}/${category}/${visualFile.name}`);
+                const uploadTask = uploadBytesResumable(storageRef, visualFile);
 
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    setUploadProgress(progress);
-                },
-                (error) => {
-                    setFeedback(`Error uploading visual: ${error.message}`);
-                },
-                async () => {
-                    try {
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        await addVisualToFirestore(downloadURL);
-                        setVisualTitle('');
-                        setFeedback('Visual uploaded successfully!');
-                    } catch (error) {
-                        setFeedback(`Error getting download URL: ${error.message}`);
-                    }
-                });
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        setUploadProgress(progress);
+                    },
+                    (error) => {
+                        setFeedback(`Error uploading visual: ${error.message}`);
+                    },
+                    async () => {
+                        try {
+                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                            await addVisualToFirestore(downloadURL);
+                            setVisualTitle('');
+                            setFeedback('Visual uploaded successfully!');
+                        } catch (error) {
+                            setFeedback(`Error getting download URL: ${error.message}`);
+                        }
+                    });
+            }
         } else {
-            setFeedback('Please select a file for the visual.');
+            setFeedback('Please select files for the visual.');
         }
     };
-
 
     const handleDeleteVisual = async (id) => {
         try {
@@ -156,86 +172,76 @@ const Visuals = () => {
         }
     };
 
-    const getVideoType = (url) => {
-        if (url.endsWith('.mp4')) return "video/mp4";
-        if (url.endsWith('.ogg')) return "video/ogg";
-        if (url.endsWith('.webm')) return "video/webm";
-        if (url.endsWith('.mkv')) return "video/x-matroska";
-        return "";
-    };
-
 
     return (
-        <div className='visuals-container'>
-            {feedback && <div>{feedback}</div>}
-            <form onSubmit={handleAddVisual}>
-                <label>
-                    Visual Title:
-                    <input
-                        value={visualTitle}
-                        onChange={e => setVisualTitle(e.target.value)}
-                        placeholder="Visual title"
-                    />
-                </label>
-                <br />
-                <label>
-                    Visual Category:
-                    <select value={visualCategory} onChange={e => setVisualCategory(e.target.value)}>
-                        <option value="">Select Category</option>
-                        <option value="eventsAndTouring">Events and Touring</option>
-                        <option value="rockingTheDaisies">Rocking the Daisies</option>
-                        <option value="inTheCity">In the City</option>
-                    </select>
-                </label>
-                <br />
-                <label>
-                    Event:
+        <div className={styles['visuals-container']}>
+            <div className={styles['form-column']}>
+                {feedback && <div>{feedback}</div>}
+                <form onSubmit={handleAddVisual}>
+                    <label>
+                        Visual Title:
+                        <input
+                            value={visualTitle}
+                            onChange={e => setVisualTitle(e.target.value)}
+                            placeholder="Visual title"
+                        />
+                    </label>
+                    <br />
+                    <label>
+                        Visual Category:
+                        <select value={visualCategory} onChange={e => setVisualCategory(e.target.value)}>
+                            <option value="">Select Category</option>
+                            <option value="eventsAndTouring">Events and Touring</option>
+                            <option value="rockingTheDaisies">Rocking the Daisies</option>
+                            <option value="inTheCity">In the City</option>
+                        </select>
+                    </label>
+                    <br />
+                    <label>
+                        Event:
 
-                    <select value={selectedEvent ? selectedEvent.id : ''} onChange={handleEventChange} disabled={!visualCategory}>
-                        <option value="">Select Event</option>
-                        {events.map(event => (
-                            <option key={event.id} value={event.id}>
-                                {event.title}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <br />
-                <label>
-                    Visual File:
-                    <input type="file" onChange={e => setVisualFile(e.target.files[0])} />
-                </label>
-                <br />
-                <button type="submit">Add Visual</button>
-            </form>
-            <ul>
-                {visuals.map((visual, index) => (
-
-                    <li key={index}>
-                        
-                        {visual.media && (
-                            visual.media.endsWith('.mp4') ||
-                            visual.media.endsWith('.ogg') ||
-                            visual.media.endsWith('.webm') ||
-                            visual.media.endsWith('.mkv')
-                        ) ? (
-                            console.log("Media URL:", visual.media),
-                            console.log("MIME Type:", getVideoType(visual.media)),
-                            <video width="320" height="240" controls onError={(e) => console.error('Video error', e)}>
-                                <source src={visual.media} type={getVideoType(visual.media)} />
-                                Your browser does not support the video tag.
-                            </video>
-
-                        ) : (
-                            <img src={visual.media} alt={visual.title} />
-                        )}
-                        <h3>{visual.title}</h3>
-                        <p>Category: {visualCategory}</p>
-                        <button onClick={() => handleDeleteVisual(visual.id)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
-            <button onClick={fetchMoreVisuals}>Load More</button>
+                        <select value={selectedEvent ? selectedEvent.id : ''} onChange={handleEventChange} disabled={!visualCategory}>
+                            <option value="">Select Event</option>
+                            {events.map(event => (
+                                <option key={event.id} value={event.id}>
+                                    {event.title}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                    <br />
+                    <label>
+                        Visual File:
+                        <input type="file" onChange={e => setVisualFiles(e.target.files)} multiple />
+                    </label>
+                    <br />
+                    <button type="submit">Add Visual</button>
+                </form>
+            </div>
+            <div className={styles['slider-column']}>
+                {visuals.length > 0 ? (
+                    <>
+                            <img
+                                src={visuals[currentVisualIndex].media}
+                                alt={visuals[currentVisualIndex].title}
+                                style={{
+                                    maxWidth: '200px',
+                                    maxHeight: '200px',
+                                    display: 'block',
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto'
+                                }}
+                            />
+                            <h3>{visuals[currentVisualIndex].title}</h3>
+                            <p>Category: {visuals[currentVisualIndex].category}</p>
+                            <button onClick={() => handleDeleteVisual(visuals[currentVisualIndex].id)}>Delete</button>
+                        <button onClick={prevVisual}>Previous</button>
+                        <button onClick={nextVisual}>Next</button>
+                    </>
+                ) : (
+                    <p>Loading...</p>
+                )}
+            </div>
         </div>
     );
 }

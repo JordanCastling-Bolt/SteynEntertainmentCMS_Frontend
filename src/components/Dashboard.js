@@ -10,10 +10,8 @@ function App() {
     const [hasError, setHasError] = useState(false);
 
     const chartRefs = useRef({
-        mobile: React.createRef(),
         geo: React.createRef(),
         userEngagement: React.createRef(),
-        user: React.createRef(),
         technology: React.createRef(),
         acquisition: React.createRef(),
         behaviorFlow: React.createRef(),
@@ -55,7 +53,6 @@ function App() {
 
         const userData = data.user || []; // assuming 'user' key has user data
         const mobileData = data.mobile || []; // assuming 'mobile' key has mobile data
-
         const activeUsersCount = userData.filter(user => user.is_active_user).length;
         const totalUsersCount = userData.length;
         const activeUsersPercentage = (activeUsersCount / totalUsersCount) * 100;
@@ -82,15 +79,113 @@ function App() {
                 }
 
                 switch (key) {
-                    case "userEngagement":
+                    case "geo":
+                        const cities = value.map(d => d.geo.city || 'Unknown'); // Use 'city' instead of 'country'
+
+                        const cityCounts = cities.reduce((acc, city) => {
+                            acc[city] = (acc[city] || 0) + 1;
+                            return acc;
+                        }, {});
+
+                        chartConfig = {
+                            type: 'pie',
+                            data: {
+                                labels: Object.keys(cityCounts),
+                                datasets: [{
+                                    data: Object.values(cityCounts),
+                                    backgroundColor: [
+                                        'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
+                                    ]
+                                }]
+                            }
+                        };
+                        break;
+
+                    case "technology":
+                        const browsers = value.map(d => d.browser || 'Unknown');
+                        const oses = value.map(d => d.operating_system || 'Unknown');
+                        const browserCounts = value.map(d => d.browser_count || 0);
+                        const osCounts = value.map(d => d.os_count || 0);
+                        chartConfig = {
+                            type: 'pie',
+                            data: {
+                                labels: [...new Set([...browsers, ...oses])],
+                                datasets: [{
+                                    data: [...browserCounts, ...osCounts],
+                                    backgroundColor: [
+                                        'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
+                                    ]
+                                }]
+                            }
+                        };
+                        break;
+
+                    case "acquisition":
+                        chartConfig = {
+                            type: 'bar',
+                            data: {
+                                labels: value.map(d => `${d.source || 'Unknown'}/${d.medium || 'Unknown'}`),
+                                datasets: [{
+                                    label: 'Source and Medium Counts',
+                                    data: value.map(d => d.source_count),
+                                    backgroundColor: 'blue'
+                                }]
+                            }
+                        };
+                        break;
+
+                    case "behaviorFlow":
+                        chartConfig = {
+                            type: 'line',
+                            data: {
+                                labels: value.map(d => d.event_bundle_sequence_id),
+                                datasets: [{
+                                    label: 'Behavior Flow',
+                                    data: value.map(d => d.event_bundle_sequence_id),
+                                    backgroundColor: 'blue'
+                                }]
+                            }
+                        };
+                        break;
+
+                    case "userRetention":
+                        chartConfig = {
+                            type: 'line',
+                            data: {
+                                labels: value.map(d => d.date),
+                                datasets: [{
+                                    label: 'User Retention',
+                                    data: value.map(d => d.retained_users),
+                                    backgroundColor: 'blue'
+                                }]
+                            }
+                        };
+                        break;
+
+                    case "eventPopularity":
                         chartConfig = {
                             type: 'bar',
                             data: {
                                 labels: value.map(d => d.event_name),
                                 datasets: [{
-                                    label: 'Event Count',
+                                    label: 'Event Popularity',
                                     data: value.map(d => d.event_count),
                                     backgroundColor: 'blue'
+                                }]
+                            }
+                        };
+                        break;
+
+                    case "trafficSourceAnalysis":
+                        chartConfig = {
+                            type: 'pie',
+                            data: {
+                                labels: value.map(d => d.source),
+                                datasets: [{
+                                    data: value.map(d => d.source_count),
+                                    backgroundColor: [
+                                        'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
+                                    ]
                                 }]
                             }
                         };
@@ -99,82 +194,59 @@ function App() {
                         chartConfig = {
                             type: 'line',
                             data: {
-                                labels: value.map(d => (d.date ? d.date.value : null) || d.date),
+                                labels: value.map(d => d.date),
                                 datasets: [{
-                                    label: key,
-                                    data: value.map(d => d.user_count || d.retained_users),
+                                    label: 'User Activity Over Time',
+                                    data: value.map(d => d.user_count),
                                     backgroundColor: 'blue'
                                 }]
                             }
                         };
                         break;
-                    case "mobile":
-                        chartConfig = {
-                            type: 'pie',
-                            data: {
-                                labels: Object.keys(osCounts),
-                                datasets: [{
-                                    data: Object.values(osCounts),
-                                    backgroundColor: [
-                                        // Add as many colors as required or generate dynamically
-                                        'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
-                                    ]
-                                }]
-                            }
-                        };
-                        break;
-                    case "geo":
+
+                    case "userEngagement":
                         chartConfig = {
                             type: 'bar',
                             data: {
-                                labels: Object.keys(countryCounts),
+                                labels: value.map(d => d.event_name),
                                 datasets: [{
-                                    label: 'Number of Users',
-                                    data: Object.values(countryCounts),
+                                    label: 'User Engagement',
+                                    data: value.map(d => d.event_count),
                                     backgroundColor: 'blue'
                                 }]
                             }
                         };
                         break;
-                        case "user":
-                            chartConfig = {
-                              type: 'doughnut',
-                              data: {
-                                labels: ['Active Users', 'Inactive Users'],
-                                datasets: [{
-                                  data: [activeUsersCount, totalUsersCount - activeUsersCount],
-                                  backgroundColor: ['green', 'grey']
-                                }]
-                              },
-                              options: {
-                                title: {
-                                  display: true,
-                                  text: `Active Users: ${activeUsersPercentage.toFixed(2)}%`
-                                }
-                              }
-                            };
-                            break;
-                    // For simplicity, other KPIs can be processed in a similar manner.
-                    // Additional cases can be added based on KPI data structure.
+
                 }
 
                 if (Object.keys(chartConfig).length) {
-                    chartInstances.current[key] = new Chart(chartRefs.current[key].current, chartConfig);
+                    try {
+                        chartInstances.current[key] = new Chart(chartRefs.current[key].current, chartConfig);
+                        console.log(`Chart for key ${key} rendered successfully.`);
+                    } catch (error) {
+                        console.error(`Error rendering chart for key ${key}:`, error);
+                    }
                 }
             });
         }
     }, [isLoading, data]);
 
+    // Inside your return statement
     return (
         <div className="Dashboard">
-            {hasError ? <div>Error occurred while fetching data. Please try again later.</div> :
-                Object.entries(chartRefs.current).map(([key, ref]) => (
-                    <div key={key} style={{ width: '300px', height: '300px', margin: '20px' }}>
-                        <canvas ref={ref}></canvas>
+            {hasError ?
+                <div>Error occurred while fetching data. Please try again later.</div>
+                :
+                Object.keys(data).map((key) => (
+                    <div key={key} className="chart-container">
+                        <canvas ref={chartRefs.current[key]}></canvas>
                     </div>
-                ))}
+                ))
+            }
         </div>
     );
+
 }
 
 export default App;
