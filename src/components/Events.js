@@ -4,7 +4,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 import styles from './style/Events.module.css';
 
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 3;
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -184,7 +184,7 @@ const Events = () => {
               <li key={index}>
                 {event.picture && <img src={event.picture} alt={event.title} />}
                 {editingId === event.id ? (
-                  <div>
+                  <div className='events-p'>
                     <input type="text" value={editName} onChange={e => setEditName(e.target.value)} />
                     <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)}></textarea>
                     <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} />

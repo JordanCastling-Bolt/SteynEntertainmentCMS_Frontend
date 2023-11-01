@@ -218,30 +218,32 @@ const NewsArticle = () => {
         ))}
         <button onClick={fetchMoreArticles}>Load more articles</button>
       </div>
-      <div className="right-column">
-        <h3>Add New Article</h3>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Article Title" />
-          </div>
-          <div>
-            <ReactQuill value={content} onChange={setContent} />
-          </div>
-          <div>
-            <input type="file" onChange={e => setImage(e.target.files[0])} />
-          </div>
-          <div>
-            <select value={category} onChange={e => setCategory(e.target.value)}>
-              <option value="">Select Category</option>
-              <option value="eventsAndTouring">Events and Touring</option>
-              <option value="rockingTheDaisies">Rocking the Daisies</option>
-              <option value="inTheCity">In the City</option>
-            </select>
-          </div>
-          <div>
-            <button type="submit">Submit</button>
-          </div>
-        </form>
+      <div className={styles["news-article-container"]}>
+        <div className="right-column">
+          <h3>Add New Article</h3>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Article Title" />
+            </div>
+            <div className='article-p'>
+              <ReactQuill value={content} onChange={setContent} />
+            </div>
+            <div>
+              <input type="file" onChange={e => setImage(e.target.files[0])} />
+            </div>
+            <div>
+              <select value={category} onChange={e => setCategory(e.target.value)}>
+                <option value="">Select Category</option>
+                <option value="eventsAndTouring">Events and Touring</option>
+                <option value="rockingTheDaisies">Rocking the Daisies</option>
+                <option value="inTheCity">In the City</option>
+              </select>
+            </div>
+            <div>
+              <button type="submit">Submit</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

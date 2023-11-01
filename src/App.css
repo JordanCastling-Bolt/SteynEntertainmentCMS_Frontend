@@ -1,10 +1,9 @@
 /* Global Styling */
-/* Global Styling */
 body {
   font-family: 'Roboto', sans-serif; 
   margin: 0;
-  background-color: #f5f7fa;
-  color: #333;
+  background-color: #F4F4F4;
+  color: #6d6d6d;
 }
 
 .App {
@@ -14,8 +13,8 @@ body {
 
 .sidebar {
   width: 250px;
-  background-color: #1d2530;
-  color: black;
+  background-color: #2E3A48;
+  color: #fff;
   padding: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
@@ -34,68 +33,34 @@ body {
 }
 
 .sidebar li:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #475B6E;
 }
 
 .main-content {
   flex: 1;
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: #F4F4F4;
 }
 
 h2 {
   margin-top: 0;
+  color: #333;
 }
 
-
-.App-header {
-  background-color: #1d2530;
-  padding: 40px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: white;
-}
-
-.App-logo {
-  height: 25vmin;
-  margin-bottom: 20px;
-}
-
-.App-link {
-  color: #61dafb;
-  text-decoration: none;
-  font-weight: bold;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.3s ease;
-}
-
-.App-link:hover {
-  border-bottom: 2px solid #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 /* Form Styling */
 form {
-  background: #ffffff;
+  background: #FFFFFF;
   padding: 20px 30px;
   border-radius: 8px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
   margin: 20px 0;
 }
 
 input, textarea, button {
-  width: 100%;
+  width: 95%;
   padding: 12px;
   margin-bottom: 10px;
-  border: 1px solid #e1e1e1;
+  border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
   transition: border-color 0.3s ease;
@@ -107,7 +72,7 @@ input:focus, textarea:focus {
 
 button {
   background-color: #007BFF;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   font-size: 16px;
 }
@@ -123,20 +88,21 @@ ul {
 }
 
 li {
-  background: #ffffff;
+  background: #000000;
   padding: 15px 20px;
   border-radius: 8px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
   margin-bottom: 15px;
 }
 
 h3 {
   margin: 0;
+  color: #333;
 }
 
-p {
+p, u {
   margin: 10px 0;
-  color: #333;
+  color: #000000;
 }
 
 .user-info {
@@ -144,18 +110,37 @@ p {
   align-items: center; 
   gap: 10px; 
 }
+.user-info-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.user-info-welcome {
+  margin: 0;
+  font-size: 14px;
+  color: #ccc; /* Light gray */
+}
+
+.user-info-name {
+  margin: 0;
+  font-size: 18px;
+  color: #fff; /* White */
+}
+
+.user-info-logout {
+  margin-left: auto;  /* Push to the end of flexbox */
+}
 .sidebar-logo {
   height: 50px; /* adjust as necessary */
   width: 50px;  /* adjust as necessary */
 }
 
 /* Feedback and Error Message Styling */
-div {
-  background: #ffffff; /* light red for feedback/error */
-  padding: 10px;
+div.feedback {
+  background: #e6e6e6; /* light gray for feedback */
+  padding: 15px;
   border-radius: 4px;
   margin-bottom: 20px;
+  color: #333;
 }
-
-

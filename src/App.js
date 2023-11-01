@@ -4,7 +4,7 @@ import './App.css';
 import NewsArticle from './components/NewsArticle';
 import Events from './components/Events';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirestore, doc, getDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
 import Dashboard from './components/Dashboard';
 import Visuals from './components/Visuals';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,6 @@ function App() {
   const [allUsers, setAllUsers] = useState([]);  // New state to hold all users
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
 
-  // Fetch current user and all other users
   useEffect(() => {
     const auth = getAuth();
     const db = getFirestore();
@@ -33,11 +32,6 @@ function App() {
           const fullName = `${userData.firstName} ${userData.lastName}`;
           setUserName(fullName);
         }
-
-        const usersCollection = collection(db, 'Users');
-        const userSnapshot = await getDocs(usersCollection);
-        const usersList = userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        setAllUsers(usersList);
       }
 
       setLoading(false);
@@ -45,6 +39,22 @@ function App() {
 
     return () => unsubscribe();
   }, []);
+
+  const fetchFilteredUsers = async (searchTerm) => {
+    const db = getFirestore();
+    const usersCollection = collection(db, 'Users');
+    const userQuery = query(usersCollection, where('email', '==', searchTerm));
+    const userSnapshot = await getDocs(userQuery);
+    const usersList = userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    setAllUsers(usersList);
+  };
+
+  useEffect(() => {
+    if (searchTerm) {
+      fetchFilteredUsers(searchTerm);
+    }
+  }, [searchTerm]);
+
   const auth = getAuth();
   const handleLogout = () => {
     signOut(auth).then(() => {
@@ -67,7 +77,7 @@ function App() {
     return (
       <div>
         Please sign in to access the content.
-        <button onClick={() => navigate('/login')}>Login</button> 
+        <button onClick={() => navigate('/login')}>Login</button>
       </div>
     );
   }
@@ -79,15 +89,25 @@ function App() {
   if (loading) {
     return <div>Loading...</div>;
   }
-  
+
   return (
     <div className="App">
       <aside className="sidebar">
         <div className="user-info">
-          <img src={logo} alt="Logo" className="sidebar-logo" /> 
-          <p>Welcome, {userName || user.email}!</p>
-          {user && <button onClick={handleLogout}>Logout</button>}
+          <div className="user-info-details">
+            <img src={logo} alt="Logo" className="sidebar-logo" />
+            <div>
+              <p className="user-info-welcome">Welcome,</p>
+              <h4 className="user-info-name">{userName || user.email}</h4>
+            </div>
+          </div>
+          {user && (
+            <div className="user-info-logout">
+              <button onClick={handleLogout}>Logout</button>
+            </div>
+          )}
         </div>
+
         <ul>
           <li onClick={() => setActiveSection('Dashboard')}>Dashboard</li>
           <li onClick={() => setActiveSection('Articles')}>Articles</li>
@@ -114,10 +134,10 @@ function App() {
         {activeSection === 'Visuals' && (
           <section className="visuals">
             <h2>Visuals</h2>
-            <Visuals/>
+            <Visuals />
           </section>
-          )}
-          {activeSection === 'ManageRoles' && (  // New section for role management
+        )}
+        {activeSection === 'ManageRoles' && (  // New section for role management
           <section className="manage-roles">
             <h2>Manage Roles</h2>
             <input
@@ -132,6 +152,7 @@ function App() {
                   {u.email} - {u.role}
                   <button onClick={() => updateRole(u.id, 'admin')}>Make Admin</button>
                   <button onClick={() => updateRole(u.id, 'user')}>Make User</button>
+                  <button onClick={() => updateRole(u.id, 'member')}>Make Member</button> {/* New button */}
                 </li>
               ))}
             </ul>

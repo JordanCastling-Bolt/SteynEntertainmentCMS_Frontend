@@ -22,7 +22,12 @@
     font-weight: 600;
     color: #333;
 }
-
+.article-p .ql-container.ql-snow {
+    font-size: 28px;
+    margin-bottom: 25px;
+    font-weight: 600;
+    color: #333;
+}
 .news-article-container input[type="text"],
 .news-article-container input[type="file"],
 .news-article-container button {
