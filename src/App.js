@@ -121,13 +121,13 @@ function App() {
         {activeSection === 'Dashboard' && <Dashboard />}
         {activeSection === 'Articles' && (
           <section className="articles">
-            <h2>Latest Articles</h2>
+            <h2>Articles</h2>
             <NewsArticle />
           </section>
         )}
         {activeSection === 'Events' && (
           <section className="events">
-            <h2>Upcoming Events</h2>
+            <h2>Events</h2>
             <Events />
           </section>
         )}

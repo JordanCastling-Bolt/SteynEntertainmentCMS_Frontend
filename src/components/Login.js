@@ -1,72 +1,83 @@
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getFirestore, getDoc } from 'firebase/firestore'; // Firestore imports
+import { doc, getFirestore, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './style/Login.css';
 import logo from '../logo.svg';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const auth = getAuth();
-        const db = getFirestore();
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const userId = userCredential.user.uid;
+  const loginUser = async () => {
+    setIsLoading(true);
+    const auth = getAuth();
+    const db = getFirestore();
 
-            // Fetch the user's role from the Users collection
-            const userDocRef = doc(db, 'Users', userId);
-            const userDocSnap = await getDoc(userDocRef);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid;
 
-            if (userDocSnap.exists()) {
-                const userData = userDocSnap.data();
+      const userDocRef = doc(db, 'Users', userId);
+      const userDocSnap = await getDoc(userDocRef);
 
-                // Check if the user role is admin
-                if (userData.role === 'admin') {
-                    navigate('/app');
-                } else {
-                    setError('You are not authorized to access this site.');
-                }
-            } else {
-                setError('User data not found.');
-            }
-        } catch (e) {
-            setError(e.message);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+
+        if (userData.role === 'admin') {
+          navigate('/app');
+        } else {
+          setError('You are not authorized to access this site.');
         }
-    };
+      } else {
+        setError('User data not found.');
+      }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return (
-        <div className="Login-body">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-            </header>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (email && password) {
+      loginUser();
+    } else {
+      setError('Please enter your email and password.');
+    }
+  };
 
-            <div className="login-body">
-
-                <form className="login-form" onSubmit={handleSubmit}>
-                    <input
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="Email"
-                        type="email"
-                    />
-                    <input
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="Password"
-                        type="password"
-                    />
-                    {error && <p>{error}</p>}
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-        </div>
-    );
+  return (
+    <div className="login-body">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+      </header>
+      <form className="login-form" onSubmit={handleSubmit}>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          type="email"
+          required
+        />
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          type="password"
+          required
+        />
+        {error && <p className="error-message">{error}</p>}
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default Login;
