@@ -14,8 +14,8 @@ function App() {
   const [userName, setUserName] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('Dashboard');
-  const [allUsers, setAllUsers] = useState([]);  // New state to hold all users
-  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
+  const [allUsers, setAllUsers] = useState([]);  
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -63,7 +63,7 @@ function App() {
     });
   };
 
-  const updateRole = async (uid, newRole) => {  // Function to update user role in Firestore
+  const updateRole = async (uid, newRole) => {  
     const db = getFirestore();
     const userRef = doc(db, 'Users', uid);
     await updateDoc(userRef, {
@@ -137,14 +137,14 @@ function App() {
             <Visuals />
           </section>
         )}
-        {activeSection === 'ManageRoles' && (  // New section for role management
+        {activeSection === 'ManageRoles' && (  
           <section className="manage-roles">
             <h2>Manage Roles</h2>
             <input
               type="text"
               placeholder="Search by email"
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)} // Updating the search term
+              onChange={e => setSearchTerm(e.target.value)} 
             />
             <ul>
               {filteredUsers.map(u => (
@@ -152,7 +152,7 @@ function App() {
                   {u.email} - {u.role}
                   <button onClick={() => updateRole(u.id, 'admin')}>Make Admin</button>
                   <button onClick={() => updateRole(u.id, 'user')}>Make User</button>
-                  <button onClick={() => updateRole(u.id, 'member')}>Make Member</button> {/* New button */}
+                  <button onClick={() => updateRole(u.id, 'member')}>Make Member</button> 
                 </li>
               ))}
             </ul>
