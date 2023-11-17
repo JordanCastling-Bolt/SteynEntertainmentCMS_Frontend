@@ -12,6 +12,7 @@ const Events = () => {
   const [eventDescription, setEventDescription] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventUrl, setEventUrl] = useState('');
+  const [eventTicketUrl, setEventTicketUrl] = useState('');
   const [eventImage, setEventImage] = useState(null);
   const [eventCategory, setEventCategory] = useState('');
   const [feedback, setFeedback] = useState('');
@@ -20,6 +21,7 @@ const Events = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editDate, setEditDate] = useState('');
   const [editUrl, setEditUrl] = useState('');
+  const [editTicketUrl, setEditTicketUrl] = useState('');
   const [editCategory, setEditCategory] = useState('');
   const [lastVisible, setLastVisible] = useState(null);
 
@@ -47,6 +49,7 @@ const Events = () => {
     const description = eventDescription;
     const date = eventDate;
     const url = eventUrl;
+    const ticketUrl = eventTicketUrl;
     const category = eventCategory;
 
     if (eventImage) {
@@ -69,10 +72,11 @@ const Events = () => {
               description,
               date,
               url,
+              ticketUrl,
               category,
               picture: downloadURL
             });
-            setEvents([...events, { title, description, date, url, picture: downloadURL, category }]);
+            setEvents([...events, { title, description, date, url, ticketUrl, picture: downloadURL, category }]);
             setEventName('');
             setEventDescription('');
             setFeedback('Event added successfully!');
@@ -111,6 +115,7 @@ const Events = () => {
     const updatedCategory = editCategory;
     const updatedDate = editDate;
     const updatedUrl = editUrl;
+    const updatedTicketURL = editTicketUrl;
 
     try {
       const eventRef = doc(db, 'Events', id);
@@ -140,6 +145,7 @@ const Events = () => {
         description: updatedDescription,
         date: updatedDate,
         url: updatedUrl,
+        ticketUrl: updatedTicketURL,
         category: updatedCategory
       };
 
@@ -189,6 +195,7 @@ const Events = () => {
                     <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)}></textarea>
                     <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} />
                     <input type="url" value={editUrl} onChange={e => setEditUrl(e.target.value)} />
+                    <input type="ticketUrl" value={editTicketUrl} onChange={e => setEditTicketUrl(e.target.value)} />
                     <select value={editCategory} onChange={e => setEditCategory(e.target.value)}>
                       <option value="">Select Category</option>
                       <option value="eventsAndTouring">Events and Touring</option>
@@ -204,12 +211,14 @@ const Events = () => {
                     <p>{event.description}</p>
                     <p>Date: {event.date}</p>
                     <p>URL: {event.url}</p>
+                    <p>Ticket URL: {event.ticketUrl}</p>
                     <p>Category: {event.category}</p>
                     <button onClick={() => {
                       setEditName(event.title);
                       setEditDescription(event.description);
                       setEditDate(event.date);
                       setEditUrl(event.url);
+                      setEditTicketUrl(event.ticketUrl)
                       setEditCategory(event.category);
                       setEditingId(event.id);
                     }}>Edit</button>
@@ -229,6 +238,7 @@ const Events = () => {
             <textarea placeholder="Description" value={eventDescription} onChange={e => setEventDescription(e.target.value)}></textarea>
             <input type="date" placeholder="Date" value={eventDate} onChange={e => setEventDate(e.target.value)} />
             <input type="url" placeholder="URL" value={eventUrl} onChange={e => setEventUrl(e.target.value)} />
+            <input type="url" placeholder="Ticket URL" value={eventTicketUrl} onChange={e => setEventTicketUrl(e.target.value)} />
             <input type="file" onChange={e => setEventImage(e.target.files[0])} />
             <select placeholder="Category" value={eventCategory} onChange={e => setEventCategory(e.target.value)}>
               <option value="">Select Category</option>

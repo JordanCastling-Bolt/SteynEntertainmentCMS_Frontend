@@ -15,10 +15,8 @@ function App() {
         technology: React.createRef(),
         acquisition: React.createRef(),
         behaviorFlow: React.createRef(),
-        userActivityOverTime: React.createRef(),
-        userRetention: React.createRef(),
-        eventPopularity: React.createRef(),
-        trafficSourceAnalysis: React.createRef()
+        user: React.createRef(),
+        userActivityOverTime: React.createRef()
     });
 
     const chartInstances = useRef({});
@@ -28,7 +26,10 @@ function App() {
             setIsLoading(true);
             try {
                 const endpoints = Object.keys(chartRefs.current);
-                const fetchedData = await Promise.all(endpoints.map(endpoint => axios.get(`http://localhost:3001/api/kpi/${endpoint}`)));
+                const fetchedData = await Promise.all(
+                    endpoints.map(endpoint =>
+                        axios.get(`https://localhost:3001/api/kpi/${endpoint}`))
+                );
                 const newData = endpoints.reduce((acc, endpoint, index) => {
                     acc[endpoint] = fetchedData[index].data;
                     return acc;
@@ -42,6 +43,7 @@ function App() {
             }
         }
 
+
         loadData();
     }, [chartRefs]);
 
@@ -53,7 +55,7 @@ function App() {
 
         const userData = data.user || []; // assuming 'user' key has user data
         const mobileData = data.mobile || []; // assuming 'mobile' key has mobile data
-        const activeUsersCount = userData.filter(user => user.is_active_user).length;
+        const activeUsersCount = userData.filter(user => user && user.is_active_user).length;
         const totalUsersCount = userData.length;
         const activeUsersPercentage = (activeUsersCount / totalUsersCount) * 100;
         const osCounts = mobileData.reduce((accumulator, entry) => {
@@ -80,9 +82,8 @@ function App() {
 
                 switch (key) {
                     case "geo":
-                        const cities = value.map(d => d.geo.city || 'Unknown'); // Use 'city' instead of 'country'
-
-                        const cityCounts = cities.reduce((acc, city) => {
+                        const cityCounts = value.reduce((acc, entry) => {
+                            const city = entry.geo.city || 'Unknown';
                             acc[city] = (acc[city] || 0) + 1;
                             return acc;
                         }, {});
@@ -97,6 +98,19 @@ function App() {
                                         'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
                                     ]
                                 }]
+                            },
+                            options: {
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'City Distribution'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => `City: ${context.label} - Count: ${context.raw}`
+                                        }
+                                    }
+                                }
                             }
                         };
                         break;
@@ -116,6 +130,19 @@ function App() {
                                         'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
                                     ]
                                 }]
+                            },
+                            options: {
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Operating System Distribution'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => `${context.dataset.label}: ${context.label} - Count: ${context.raw}`
+                                        }
+                                    }
+                                }
                             }
                         };
                         break;
@@ -130,9 +157,23 @@ function App() {
                                     data: value.map(d => d.source_count),
                                     backgroundColor: 'blue'
                                 }]
+                            },
+                            options: {
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Traffic Source and Medium'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => `Source/Medium: ${context.label} - Count: ${context.raw}`
+                                        }
+                                    }
+                                }
                             }
                         };
                         break;
+
 
                     case "behaviorFlow":
                         chartConfig = {
@@ -144,9 +185,23 @@ function App() {
                                     data: value.map(d => d.event_bundle_sequence_id),
                                     backgroundColor: 'blue'
                                 }]
+                            },
+                            options: {
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'User Behavior Flow'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => `Sequence ID: ${context.label}`
+                                        }
+                                    }
+                                }
                             }
                         };
                         break;
+
 
                     case "userRetention":
                         chartConfig = {
@@ -158,48 +213,19 @@ function App() {
                                     data: value.map(d => d.retained_users),
                                     backgroundColor: 'blue'
                                 }]
-                            }
-                        };
-                        break;
-
-                    case "eventPopularity":
-                        chartConfig = {
-                            type: 'bar',
-                            data: {
-                                labels: value.map(d => d.event_name),
-                                datasets: [{
-                                    label: 'Event Popularity',
-                                    data: value.map(d => d.event_count),
-                                    backgroundColor: 'blue'
-                                }]
-                            }
-                        };
-                        break;
-
-                    case "trafficSourceAnalysis":
-                        chartConfig = {
-                            type: 'pie',
-                            data: {
-                                labels: value.map(d => d.source),
-                                datasets: [{
-                                    data: value.map(d => d.source_count),
-                                    backgroundColor: [
-                                        'red', 'green', 'blue', 'yellow', 'purple', 'cyan', 'magenta'
-                                    ]
-                                }]
-                            }
-                        };
-                        break;
-                    case "userActivityOverTime":
-                        chartConfig = {
-                            type: 'line',
-                            data: {
-                                labels: value.map(d => d.date),
-                                datasets: [{
-                                    label: 'User Activity Over Time',
-                                    data: value.map(d => d.user_count),
-                                    backgroundColor: 'blue'
-                                }]
+                            },
+                            options: {
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'User Retention Over Time'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => `Date: ${context.label} - Retained Users: ${context.raw}`
+                                        }
+                                    }
+                                }
                             }
                         };
                         break;
@@ -214,6 +240,69 @@ function App() {
                                     data: value.map(d => d.event_count),
                                     backgroundColor: 'blue'
                                 }]
+                            }
+                        };
+                        break;
+
+
+                    case "user":
+                        // Check if value is an array and not null, else set activeUsersCount to 0
+                        const activeUsersCount = Array.isArray(value) ?
+                            value.filter(user => user && user.is_active_user).length : 0;
+
+                        // Define chartConfig for 'user' based on activeUsersCount
+                        // Example: Showing activeUsersCount in a simple bar chart
+                        chartConfig = {
+                            type: 'bar',
+                            data: {
+                                labels: ['Active Users'],
+                                datasets: [{
+                                    label: 'Count',
+                                    data: [activeUsersCount],
+                                    backgroundColor: 'blue'
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Active Users Count'
+                                    }
+                                }
+                            }
+                        };
+                        break;
+
+                    case "userActivityOverTime":
+                        chartConfig = {
+                            type: 'line',
+                            data: {
+                                labels: value.map(d => d.date),
+                                datasets: [{
+                                    label: 'User Activity',
+                                    data: value.map(d => d.user_count),
+                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'User Activity Over Time'
+                                    }
+                                }
                             }
                         };
                         break;
@@ -235,18 +324,18 @@ function App() {
     // Inside your return statement
     return (
         <div className="Dashboard">
-            {hasError ?
+            {hasError ? (
                 <div>Error occurred while fetching data. Please try again later.</div>
-                :
-                Object.keys(data).map((key) => (
-                    <div key={key} className="chart-container">
-                        <canvas ref={chartRefs.current[key]}></canvas>
-                    </div>
+            ) : (
+                Object.keys(chartRefs.current).map((key) => (
+                    data[key] && data[key].length > 0 && (
+                        <div key={key} className="chart-container">
+                            <canvas ref={chartRefs.current[key]}></canvas>
+                        </div>
+                    )
                 ))
-            }
+            )}
         </div>
     );
-
 }
-
 export default App;
