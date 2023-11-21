@@ -14,7 +14,7 @@ function App() {
   const [userName, setUserName] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('Dashboard');
-  const [allUsers, setAllUsers] = useState([]);  
+  const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -40,20 +40,22 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  const fetchFilteredUsers = async (searchTerm) => {
-    const db = getFirestore();
-    const usersCollection = collection(db, 'Users');
-    const userQuery = query(usersCollection, where('email', '==', searchTerm));
-    const userSnapshot = await getDocs(userQuery);
-    const usersList = userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-    setAllUsers(usersList);
-  };
+  const filteredUsers = allUsers.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
-    if (searchTerm) {
-      fetchFilteredUsers(searchTerm);
-    }
-  }, [searchTerm]);
+    // Fetch all users initially
+    const fetchAllUsers = async () => {
+      const db = getFirestore();
+      const usersCollection = collection(db, 'Users');
+      const userSnapshot = await getDocs(usersCollection);
+      const usersList = userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      setAllUsers(usersList);
+    };
+
+    fetchAllUsers();
+  }, []);
 
   const auth = getAuth();
   const handleLogout = () => {
@@ -63,7 +65,7 @@ function App() {
     });
   };
 
-  const updateRole = async (uid, newRole) => {  
+  const updateRole = async (uid, newRole) => {
     const db = getFirestore();
     const userRef = doc(db, 'Users', uid);
     await updateDoc(userRef, {
@@ -81,10 +83,6 @@ function App() {
       </div>
     );
   }
-
-  const filteredUsers = allUsers.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   if (loading) {
     return <div>Loading...</div>;
@@ -137,14 +135,14 @@ function App() {
             <Visuals />
           </section>
         )}
-        {activeSection === 'ManageRoles' && (  
+        {activeSection === 'ManageRoles' && (
           <section className="manage-roles">
             <h2>Manage Roles</h2>
             <input
               type="text"
               placeholder="Search by email"
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)} 
+              onChange={e => setSearchTerm(e.target.value)}
             />
             <ul>
               {filteredUsers.map(u => (
@@ -152,7 +150,7 @@ function App() {
                   {u.email} - {u.role}
                   <button onClick={() => updateRole(u.id, 'admin')}>Make Admin</button>
                   <button onClick={() => updateRole(u.id, 'user')}>Make User</button>
-                  <button onClick={() => updateRole(u.id, 'member')}>Make Member</button> 
+                  <button onClick={() => updateRole(u.id, 'member')}>Make Member</button>
                 </li>
               ))}
             </ul>

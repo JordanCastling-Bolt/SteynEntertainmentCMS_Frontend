@@ -10,13 +10,13 @@ function App() {
     const [hasError, setHasError] = useState(false);
 
     const chartRefs = useRef({
+        userActivityOverTime: React.createRef(),
         geo: React.createRef(),
         userEngagement: React.createRef(),
         technology: React.createRef(),
         acquisition: React.createRef(),
         behaviorFlow: React.createRef(),
-        user: React.createRef(),
-        userActivityOverTime: React.createRef()
+        user: React.createRef()
     });
 
     const chartInstances = useRef({});
@@ -279,13 +279,35 @@ function App() {
                         break;
 
                     case "userActivityOverTime":
+                        const activityByDate = {};
+
+                        // Group data by date and sum activity counts
+                        value.forEach(d => {
+                            if (d && d.date && d.date.value) { // Adjusted to access d.date.value
+                                const dateValue = d.date.value; // Extracting the date string
+                                if (!activityByDate[dateValue]) {
+                                    activityByDate[dateValue] = { total: 0, count: 0 };
+                                }
+                                activityByDate[dateValue].total += d.active_count;
+                                activityByDate[dateValue].count += 1;
+                            }
+                        });
+
+                        // Calculate average activity per date
+                        const averageActivity = Object.keys(activityByDate).map(date => {
+                            return {
+                                date: date,
+                                average: activityByDate[date].total / activityByDate[date].count
+                            };
+                        });
+
                         chartConfig = {
                             type: 'line',
                             data: {
-                                labels: value.map(d => d.date),
+                                labels: averageActivity.map(d => d.date),
                                 datasets: [{
-                                    label: 'User Activity',
-                                    data: value.map(d => d.user_count),
+                                    label: 'Average User Activity',
+                                    data: averageActivity.map(d => d.average),
                                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                                     borderColor: 'rgba(75, 192, 192, 1)',
                                     borderWidth: 1
@@ -300,13 +322,12 @@ function App() {
                                 plugins: {
                                     title: {
                                         display: true,
-                                        text: 'User Activity Over Time'
+                                        text: 'Average User Activity Over Time'
                                     }
                                 }
                             }
                         };
                         break;
-
                 }
 
                 if (Object.keys(chartConfig).length) {

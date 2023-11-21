@@ -40,28 +40,33 @@ const Visuals = () => {
 
     useEffect(() => {
         const fetchVisuals = async () => {
-            if (!selectedEvent) {
+            if (!visualCategory) {
                 setVisuals([]);
                 return;
             }
 
             const visualsQuery = query(
                 collection(db, 'Visuals'),
-                where('eventId', '==', selectedEvent.id),
                 where('category', '==', visualCategory),
                 orderBy('title'),
                 limit(PAGE_SIZE)
             );
-            const visualsSnapshot = await getDocs(visualsQuery);
-            const visualsList = visualsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            setVisuals(visualsList);
-            if (visualsSnapshot.docs.length > 0) {
-                setLastVisible(visualsSnapshot.docs[visualsSnapshot.docs.length - 1]);
+
+            try {
+                const visualsSnapshot = await getDocs(visualsQuery);
+                const visualsList = visualsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                setVisuals(visualsList);
+                if (visualsSnapshot.docs.length > 0) {
+                    setLastVisible(visualsSnapshot.docs[visualsSnapshot.docs.length - 1]);
+                }
+            } catch (error) {
+                console.error('Error fetching visuals:', error);
+                setFeedback(`Error fetching visuals: ${error.message}`);
             }
         };
 
         fetchVisuals();
-    }, [selectedEvent, visualCategory]);
+    }, [visualCategory]);
 
     const nextVisual = () => {
         setCurrentVisualIndex(prevIndex => (prevIndex + 1) % visuals.length);
@@ -132,32 +137,6 @@ const Visuals = () => {
         }
     };
 
-    const fetchMoreVisuals = async () => {
-        // Stop fetching if no category or event is selected
-        if (!selectedEvent || !visualCategory) return;
-
-        const nextVisualsQuery = query(
-            collection(db, 'Visuals'),
-            where('eventId', '==', selectedEvent.id),
-            where('category', '==', visualCategory),
-            orderBy('title'),
-            startAfter(lastVisible),
-            limit(PAGE_SIZE)
-        );
-
-        const nextVisualsSnapshot = await getDocs(nextVisualsQuery);
-
-        const nextVisualsList = nextVisualsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-
-        // If there are more visuals to fetch
-        if (nextVisualsSnapshot.docs.length > 0) {
-            setLastVisible(nextVisualsSnapshot.docs[nextVisualsSnapshot.docs.length - 1]);
-        }
-
-        // Concatenate the new visuals to the existing ones
-        setVisuals(prevVisuals => [...prevVisuals, ...nextVisualsList]);
-    };
-
     const addVisualToFirestore = async (downloadURL) => {
         try {
             await addDoc(collection(db, 'Visuals'), {
@@ -172,6 +151,37 @@ const Visuals = () => {
         }
     };
 
+    const renderVisuals = () => {
+        if (visuals.length === 0) {
+            return <p>No visuals available.</p>;
+        }
+
+        const currentVisual = visuals[currentVisualIndex];
+        if (!currentVisual || !currentVisual.media) {
+            return <p>Visual data is incomplete.</p>;
+        }
+
+        return (
+            <>
+                <img
+                    src={currentVisual.media}
+                    alt={currentVisual.title || 'Visual'}
+                    style={{
+                        maxWidth: '200px',
+                        maxHeight: '200px',
+                        display: 'block',
+                        marginLeft: 'auto',
+                        marginRight: 'auto'
+                    }}
+                />
+                <h3>{currentVisual.title}</h3>
+                <p>Category: {currentVisual.category}</p>
+                <button onClick={() => handleDeleteVisual(currentVisual.id)}>Delete</button>
+                <button onClick={prevVisual}>Previous</button>
+                <button onClick={nextVisual}>Next</button>
+            </>
+        );
+    };
 
     return (
         <div className={styles['visuals-container']}>
@@ -219,28 +229,7 @@ const Visuals = () => {
                 </form>
             </div>
             <div className={styles['slider-column']}>
-                {visuals.length > 0 ? (
-                    <>
-                            <img
-                                src={visuals[currentVisualIndex].media}
-                                alt={visuals[currentVisualIndex].title}
-                                style={{
-                                    maxWidth: '200px',
-                                    maxHeight: '200px',
-                                    display: 'block',
-                                    marginLeft: 'auto',
-                                    marginRight: 'auto'
-                                }}
-                            />
-                            <h3>{visuals[currentVisualIndex].title}</h3>
-                            <p>Category: {visuals[currentVisualIndex].category}</p>
-                            <button onClick={() => handleDeleteVisual(visuals[currentVisualIndex].id)}>Delete</button>
-                        <button onClick={prevVisual}>Previous</button>
-                        <button onClick={nextVisual}>Next</button>
-                    </>
-                ) : (
-                    <p>Loading...</p>
-                )}
+                {renderVisuals()}
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { addDoc, collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, limit, startAfter } from 'firebase/firestore';
+import { addDoc, collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy, limit, startAfter, where } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 import styles from './style/Events.module.css';
@@ -26,18 +26,23 @@ const Events = () => {
   const [lastVisible, setLastVisible] = useState(null);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      const eventsQuery = query(collection(db, 'Events'), orderBy('title'), limit(PAGE_SIZE));
-      const eventsSnapshot = await getDocs(eventsQuery);
-      const eventsList = eventsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-      setEvents(eventsList);
-      if (eventsSnapshot.docs.length > 0) {
-        setLastVisible(eventsSnapshot.docs[eventsSnapshot.docs.length - 1]);
-      }
-    };
     fetchEvents();
   }, []);
 
+  const fetchEvents = async () => {
+    let eventsQuery;
+    if (eventCategory) {
+      eventsQuery = query(collection(db, 'Events'), where('category', '==', eventCategory), orderBy('title'), limit(PAGE_SIZE));
+    } else {
+      eventsQuery = query(collection(db, 'Events'), orderBy('title'), limit(PAGE_SIZE));
+    }
+    const eventsSnapshot = await getDocs(eventsQuery);
+    const eventsList = eventsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    setEvents(eventsList);
+    if (eventsSnapshot.docs.length > 0) {
+      setLastVisible(eventsSnapshot.docs[eventsSnapshot.docs.length - 1]);
+    }
+  };
 
   const handleAddEvent = async (e) => {
     e.preventDefault();
@@ -179,18 +184,18 @@ const Events = () => {
   };
 
   return (
-    <div className= {styles['events-container']}>
+    <div className={styles['events-container']}>
       <div style={{ display: 'flex', flexDirection: 'row' }}>
 
         {/* Left Column for Existing Events */}
         <div style={{ flex: 1 }}>
           {feedback && <div>{feedback}</div>}
           <ul>
-            {events.map((event, index) => (
-              <li key={index}>
-                {event.picture && <img src={event.picture} alt={event.title} />}
-                {editingId === event.id ? (
-                  <div className='events-p'>
+          {events.map((event) => ( 
+            <li key={event.id}>
+              {event.picture && <img src={event.picture} alt={event.title} />}
+              {editingId === event.id ? (
+                <div className='events-p'>
                     <input type="text" value={editName} onChange={e => setEditName(e.target.value)} />
                     <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)}></textarea>
                     <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} />
@@ -248,6 +253,15 @@ const Events = () => {
             </select>
             <button type="submit">Add Event</button>
           </form>
+        </div>
+        <div className={styles.filterSection}>
+          <select value={eventCategory} onChange={e => setEventCategory(e.target.value)}>
+            <option value="">All Categories</option>
+            <option value="eventsAndTouring">Events and Touring</option>
+            <option value="rockingTheDaisies">Rocking the Daisies</option>
+            <option value="inTheCity">In the City</option>
+          </select>
+          <button onClick={fetchEvents}>Filter</button>
         </div>
       </div>
     </div>
