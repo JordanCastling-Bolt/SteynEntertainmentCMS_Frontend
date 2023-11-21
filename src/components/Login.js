@@ -8,6 +8,7 @@ import logo from '../logo.svg';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -51,6 +52,10 @@ const Login = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="login-body">
       <header className="App-header">
@@ -64,13 +69,20 @@ const Login = () => {
           type="email"
           required
         />
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          type="password"
-          required
-        />
+        <div className="password-input-container">
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            type={showPassword ? "text" : "password"}
+            required
+          />
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className={`eye-icon ${showPassword ? '' : 'closed'}`}
+          ></button>
+        </div>
         {error && <p className="error-message">{error}</p>}
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Logging in...' : 'Login'}

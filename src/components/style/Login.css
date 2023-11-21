@@ -52,7 +52,8 @@
   border: 1px solid var(--primary-color);
 }
 
-.login-form button {
+.login-form button:not(.eye-icon) {
+  /* General button styles */
   background-color: var(--primary-color);
   color: var(--white-color);
   padding: 10px 15px;
@@ -73,3 +74,50 @@
   color: var(--error-color);
   margin-top: 10px;
 }
+.password-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.password-input-container input {
+  flex-grow: 1;
+}
+
+.login-form .eye-icon {
+  /* Eye icon specific styles */
+  background-color: transparent; /* Override any background color */
+  border: none; /* Remove border */
+  box-shadow: none; /* Remove shadow if any */
+  padding: 5px; /* No padding */
+  margin: 5px; /* No margin */
+  width: 24px; /* Set a fixed width */
+  height: 24px; /* Set a fixed height */
+  cursor: pointer; /* Pointer cursor */
+  outline: none; /* No focus outline */
+  transition: none; /* Disable transition */
+  color: transparent; /* Make text (if any) transparent */
+  font-size: 0; /* Reset font size */
+  line-height: 0; /* Reset line height */
+  display: inline-block; /* Optional, for alignment */
+}
+
+
+.eye-icon.closed {
+  background: url('images/eye-closed-light.svg') no-repeat center center; /* Closed eye icon */
+  background-size: contain;
+}
+
+.eye-icon {
+  background: url('images/eye-fill.svg') no-repeat center center; /* Open eye icon */
+  background-size: contain;
+}
+
+/* Specific rules to reset inherited styles */
+.eye-icon {
+  transition: none; /* Disable transition */
+  color: transparent; /* Make text (if any) transparent */
+  font-size: 0; /* Reset font size */
+  line-height: 0; /* Reset line height */
+  display: inline-block; /* Optional, for alignment */
+}
+
