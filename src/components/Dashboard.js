@@ -15,8 +15,8 @@ function App() {
         userEngagement: React.createRef(),
         technology: React.createRef(),
         acquisition: React.createRef(),
-        behaviorFlow: React.createRef(),
-        user: React.createRef()
+        user: React.createRef(),
+        behaviorFlow: React.createRef()       
     });
 
     const chartInstances = useRef({});
@@ -246,20 +246,24 @@ function App() {
 
 
                     case "user":
-                        // Check if value is an array and not null, else set activeUsersCount to 0
-                        const activeUsersCount = Array.isArray(value) ?
-                            value.filter(user => user && user.is_active_user).length : 0;
+                        // Assuming 'value' contains the array of user data
+                        const userData = Array.isArray(value) ? value : [];
 
-                        // Define chartConfig for 'user' based on activeUsersCount
-                        // Example: Showing activeUsersCount in a simple bar chart
+                        // Extract signup days and user counts from the data
+                        const signupDays = userData.map(item => item.signup_day?.value ?? 'Invalid Date');
+                        const uniqueUserCounts = userData.map(item => item.unique_user_count ?? 0);
+
+                        // Define chartConfig for 'user' based on extracted data
                         chartConfig = {
                             type: 'bar',
                             data: {
-                                labels: ['Active Users'],
+                                labels: signupDays,
                                 datasets: [{
-                                    label: 'Count',
-                                    data: [activeUsersCount],
-                                    backgroundColor: 'blue'
+                                    label: 'Unique User Logins',
+                                    data: uniqueUserCounts,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
                                 }]
                             },
                             options: {
@@ -271,12 +275,14 @@ function App() {
                                 plugins: {
                                     title: {
                                         display: true,
-                                        text: 'Active Users Count'
+                                        text: 'Unique User Logins Per Day'
                                     }
                                 }
                             }
                         };
                         break;
+
+
 
                     case "userActivityOverTime":
                         const activityByDate = {};
