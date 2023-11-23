@@ -57,7 +57,7 @@ const Events = () => {
     const description = eventDescription;
     const date = convertDateFormat(eventDate);
     const url = eventUrl;
-    const ticketUrl = eventTicketUrl;
+    const ticketUrl = eventTicketUrl || null;
     const category = eventCategory;
 
     if (eventImage) {
@@ -118,12 +118,15 @@ const Events = () => {
 
   const handleUpdateEvent = async (id) => {
 
+    const convertDateFormat = (inputDate) => {
+      return inputDate ? inputDate.split('-').join('/') : '';
+    };
     const updatedName = editName;
     const updatedDescription = editDescription;
     const updatedCategory = editCategory;
-    const updatedDate = editDate;
+    const updatedDate = convertDateFormat(editDate);
     const updatedUrl = editUrl;
-    const updatedTicketURL = editTicketUrl;
+    const updatedTicketURL = editTicketUrl || null; 
 
     try {
       const eventRef = doc(db, 'Events', id);
