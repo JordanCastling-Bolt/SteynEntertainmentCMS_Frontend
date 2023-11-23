@@ -1,6 +1,6 @@
 /* Variables */
 :root {
-  --primary-color: #007BFF;
+  --primary-color: #ffe600;
   --secondary-color: #333;
   --bg-color: #f3f4f6;
   --error-color: red;
@@ -55,7 +55,7 @@
 .login-form button:not(.eye-icon) {
   /* General button styles */
   background-color: var(--primary-color);
-  color: var(--white-color);
+  color: var(--secondary-color);
   padding: 10px 15px;
   border: none;
   border-radius: 4px;
@@ -66,7 +66,7 @@
 }
 
 .login-form button:hover {
-  background-color: #0056b3;
+  background-color: #ffff00;
   transform: translateY(-2px);
 }
 

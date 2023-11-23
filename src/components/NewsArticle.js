@@ -73,13 +73,15 @@ const NewsArticle = () => {
     try {
       const newImageUrl = await uploadImage(image);
       const articleRef = doc(db, 'NewsArticles', editingId);
+      const sanitizedEditingContent = removePTags(DOMPurify.sanitize(editingContent));
+
       await updateDoc(articleRef, {
         title: editingTitle,
-        content: editingContent,
+        content: sanitizedEditingContent,
         category: editingCategory,
         imageUrl: newImageUrl || editingArticle.imageUrl,
       });
-      setArticles(articles.map(article => article.id === editingId ? { ...article, title: editingTitle, content: editingContent, category: editingCategory, imageUrl } : article));
+      setArticles(articles.map(article => article.id === editingId ? { ...article, title: editingTitle, content: sanitizedEditingContent, category: editingCategory, imageUrl } : article));
       setEditingId(null);
       setFeedback('Article updated successfully!');
     } catch (error) {
@@ -110,7 +112,7 @@ const NewsArticle = () => {
 
     const storageRef = ref(storage, `NewsArticles/${image.name}`);
     const uploadTask = uploadBytesResumable(storageRef, image);
-
+    const sanitizedContent = removePTags(DOMPurify.sanitize(content));
     // Handle upload progress
     uploadTask.on('state_changed',
       (snapshot) => {
@@ -125,7 +127,7 @@ const NewsArticle = () => {
           const newImageUrl = await uploadImage(image);
           await addDoc(collection(db, 'NewsArticles'), {
             title,
-            content: DOMPurify.sanitize(content),
+            content: sanitizedContent,
             category,
             imageUrl: newImageUrl,
             timestamp: serverTimestamp(),
@@ -140,6 +142,22 @@ const NewsArticle = () => {
         }
       }
     );
+  };
+
+  const removePTags = (htmlContent) => {
+    // Create a temporary DOM element to manipulate the HTML content
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+  
+    // Replace <p> tags with their inner content
+    Array.from(tempDiv.getElementsByTagName('p')).forEach(p => {
+      const parent = p.parentNode;
+      while (p.firstChild) parent.insertBefore(p.firstChild, p);
+      parent.removeChild(p);
+    });
+  
+    // Return the modified HTML content as a string
+    return tempDiv.innerHTML;
   };
 
   const handleDeleteArticle = async (id) => {
@@ -168,7 +186,6 @@ const NewsArticle = () => {
 
   return (
     <div className={styles["news-article-container"]}>
-      {feedback && <div>{feedback}</div>}
       <div className="left-column">
         <h3>Existing Articles</h3>
         {articles.map(article => (
@@ -217,6 +234,9 @@ const NewsArticle = () => {
           </div>
         ))}
         <button onClick={fetchMoreArticles}>Load more articles</button>
+      </div>
+      <div className={styles["feedback-container"]}>
+      {feedback && <div>{feedback}</div>}
       </div>
       <div className={styles["news-article-container"]}>
         <div className="right-column">

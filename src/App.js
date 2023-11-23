@@ -68,9 +68,24 @@ function App() {
   const updateRole = async (uid, newRole) => {
     const db = getFirestore();
     const userRef = doc(db, 'Users', uid);
-    await updateDoc(userRef, {
-      role: newRole
-    });
+  
+    try {
+      await updateDoc(userRef, {
+        role: newRole
+      });
+  
+      // Update the allUsers state to reflect the role change
+      setAllUsers(prevUsers => prevUsers.map(user => {
+        if (user.id === uid) {
+          return { ...user, role: newRole };
+        }
+        return user;
+      }));
+  
+    } catch (error) {
+      console.error("Error updating role:", error);
+      // Optionally, handle the error (e.g., show a notification)
+    }
   };
 
   const navigate = useNavigate();

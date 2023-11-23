@@ -92,3 +92,40 @@
 .events-container h3 {
   margin-top: 0;
 }
+.events-container .filterSection {
+  justify-content: flex-start; /* Align items to the start */
+  align-items: center; /* Center items vertically */
+  margin-bottom: 20px; /* Spacing below the filter section */
+  padding: 10px; /* Padding around the filter section */
+  background-color: #f8f9fa; /* Light background for the filter section */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+.events-container .filterSection select,
+.events-container .filterSection button {
+  margin-right: 10px; /* Spacing between the dropdown and button */
+}
+
+.events-container .filterSection button {
+  padding: 10px 15px; /* Adjust padding for better visual appearance */
+  background-color: #007bff; /* Different color for the filter button */
+  color: white;
+}
+
+.events-container .filterSection button:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+@media (max-width: 600px) {
+  .events-container .filterSection {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: stretch; /* Stretch items to full width */
+  }
+
+  .events-container .filterSection select,
+  .events-container .filterSection button {
+    width: 100%; /* Full width on small screens */
+    margin-right: 0; /* Remove margin between elements */
+    margin-bottom: 10px; /* Add margin below each element */
+  }
+}
+

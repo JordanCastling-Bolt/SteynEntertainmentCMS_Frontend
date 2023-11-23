@@ -11,12 +11,12 @@ function App() {
 
     const chartRefs = useRef({
         userActivityOverTime: React.createRef(),
+        user: React.createRef(),
         geo: React.createRef(),
         userEngagement: React.createRef(),
         technology: React.createRef(),
         acquisition: React.createRef(),
-        user: React.createRef(),
-        behaviorFlow: React.createRef()       
+        behaviorFlow: React.createRef()
     });
 
     const chartInstances = useRef({});
@@ -249,18 +249,26 @@ function App() {
                         // Assuming 'value' contains the array of user data
                         const userData = Array.isArray(value) ? value : [];
 
-                        // Extract signup days and user counts from the data
-                        const signupDays = userData.map(item => item.signup_day?.value ?? 'Invalid Date');
-                        const uniqueUserCounts = userData.map(item => item.unique_user_count ?? 0);
+                        // Convert dates to Date objects and sort them along with user counts
+                        const sortedUserData = userData
+                            .map(item => ({
+                                date: new Date(item.signup_day?.value ?? 'Invalid Date'),
+                                count: item.unique_user_count ?? 0
+                            }))
+                            .sort((a, b) => a.date - b.date);
 
-                        // Define chartConfig for 'user' based on extracted data
+                        // Extract sorted signup days and user counts
+                        const sortedSignupDays = sortedUserData.map(item => item.date.toISOString().split('T')[0]);
+                        const sortedUniqueUserCounts = sortedUserData.map(item => item.count);
+
+                        // Define chartConfig for 'user' based on sorted data
                         chartConfig = {
                             type: 'bar',
                             data: {
-                                labels: signupDays,
+                                labels: sortedSignupDays,
                                 datasets: [{
                                     label: 'Unique User Logins',
-                                    data: uniqueUserCounts,
+                                    data: sortedUniqueUserCounts,
                                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                                     borderColor: 'rgba(54, 162, 235, 1)',
                                     borderWidth: 1
@@ -284,13 +292,14 @@ function App() {
 
 
 
+
                     case "userActivityOverTime":
                         const activityByDate = {};
 
                         // Group data by date and sum activity counts
                         value.forEach(d => {
-                            if (d && d.date && d.date.value) { // Adjusted to access d.date.value
-                                const dateValue = d.date.value; // Extracting the date string
+                            if (d && d.date && d.date.value) {
+                                const dateValue = d.date.value;
                                 if (!activityByDate[dateValue]) {
                                     activityByDate[dateValue] = { total: 0, count: 0 };
                                 }
@@ -300,12 +309,21 @@ function App() {
                         });
 
                         // Calculate average activity per date
-                        const averageActivity = Object.keys(activityByDate).map(date => {
+                        let averageActivity = Object.keys(activityByDate).map(date => {
                             return {
-                                date: date,
+                                date: new Date(date), // Convert to Date object
                                 average: activityByDate[date].total / activityByDate[date].count
                             };
                         });
+
+                        // Sort by date
+                        averageActivity = averageActivity.sort((a, b) => a.date - b.date);
+
+                        // Convert dates back to string for labels
+                        averageActivity = averageActivity.map(d => ({
+                            date: d.date.toISOString().split('T')[0],
+                            average: d.average
+                        }));
 
                         chartConfig = {
                             type: 'line',

@@ -50,9 +50,12 @@ const Events = () => {
       setFeedback('Please select a category for the event.');
       return;
     }
+    const convertDateFormat = (inputDate) => {
+      return inputDate.split('-').join('/');
+    };
     const title = eventName;
     const description = eventDescription;
-    const date = eventDate;
+    const date = convertDateFormat(eventDate);
     const url = eventUrl;
     const ticketUrl = eventTicketUrl;
     const category = eventCategory;
@@ -235,7 +238,15 @@ const Events = () => {
           </ul>
           <button onClick={fetchMoreEvents}>Load More</button>
         </div>
-
+        <div className={styles.filterSection}>
+          <select value={eventCategory} onChange={e => setEventCategory(e.target.value)}>
+            <option value="">All Categories</option>
+            <option value="eventsAndTouring">Events and Touring</option>
+            <option value="rockingTheDaisies">Rocking the Daisies</option>
+            <option value="inTheCity">In the City</option>
+          </select>
+          <button onClick={fetchEvents}>Filter</button>
+        </div>
         {/* Right Column for Adding New Event */}
         <div style={{ flex: 1 }}>
           <form onSubmit={handleAddEvent}>
@@ -253,15 +264,6 @@ const Events = () => {
             </select>
             <button type="submit">Add Event</button>
           </form>
-        </div>
-        <div className={styles.filterSection}>
-          <select value={eventCategory} onChange={e => setEventCategory(e.target.value)}>
-            <option value="">All Categories</option>
-            <option value="eventsAndTouring">Events and Touring</option>
-            <option value="rockingTheDaisies">Rocking the Daisies</option>
-            <option value="inTheCity">In the City</option>
-          </select>
-          <button onClick={fetchEvents}>Filter</button>
         </div>
       </div>
     </div>

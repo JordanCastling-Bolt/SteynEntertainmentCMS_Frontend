@@ -2,8 +2,8 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    max-width: 1200px;
-    margin: 40px auto;
+    max-width: 100%;
+    margin: 20px auto;
     padding: 20px;
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
@@ -116,3 +116,10 @@
 .news-article-container .radio-label {
     margin-right: 15px;
 }
+.feedback-container {
+    height: 50px; /* Reserve enough space for one line of text */
+    margin-bottom: 20px; /* Add some margin for spacing */
+    color: rgb(186, 192, 19); /* Optional: Color for the feedback message */
+    /* Add other styling as needed */
+  }
+  
