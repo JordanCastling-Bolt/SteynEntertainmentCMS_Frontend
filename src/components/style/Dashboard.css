@@ -15,6 +15,21 @@
   transition: all 0.3s ease-in-out;
 }
 
+/* CSS for smaller screens */
+@media screen and (max-width: 768px) {
+  .Dashboard div,
+  .chart-container {
+    width: calc(50% - 40px); /* For two charts in a row */
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .Dashboard div,
+  .chart-container {
+    width: calc(100% - 40px); /* For one chart per row */
+  }
+}
+
 .Dashboard div:hover {
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
   transform: scale(1.05);

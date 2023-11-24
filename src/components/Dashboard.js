@@ -15,7 +15,6 @@ function App() {
         geo: React.createRef(),
         userEngagement: React.createRef(),
         technology: React.createRef(),
-        acquisition: React.createRef(),
         behaviorFlow: React.createRef()
     });
 
@@ -48,6 +47,7 @@ function App() {
     }, [chartRefs]);
 
     useEffect(() => {
+        const isValidDate = (d) => d instanceof Date && !isNaN(d);
         // Destroy previous Chart instances
         Object.keys(chartInstances.current).forEach(key => {
             chartInstances.current[key]?.destroy();
@@ -100,6 +100,7 @@ function App() {
                                 }]
                             },
                             options: {
+                                responsive: true,
                                 plugins: {
                                     title: {
                                         display: true,
@@ -132,6 +133,7 @@ function App() {
                                 }]
                             },
                             options: {
+                                responsive: true,
                                 plugins: {
                                     title: {
                                         display: true,
@@ -147,34 +149,6 @@ function App() {
                         };
                         break;
 
-                    case "acquisition":
-                        chartConfig = {
-                            type: 'bar',
-                            data: {
-                                labels: value.map(d => `${d.source || 'Unknown'}/${d.medium || 'Unknown'}`),
-                                datasets: [{
-                                    label: 'Source and Medium Counts',
-                                    data: value.map(d => d.source_count),
-                                    backgroundColor: 'blue'
-                                }]
-                            },
-                            options: {
-                                plugins: {
-                                    title: {
-                                        display: true,
-                                        text: 'Traffic Source and Medium'
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: (context) => `Source/Medium: ${context.label} - Count: ${context.raw}`
-                                        }
-                                    }
-                                }
-                            }
-                        };
-                        break;
-
-
                     case "behaviorFlow":
                         chartConfig = {
                             type: 'line',
@@ -187,6 +161,7 @@ function App() {
                                 }]
                             },
                             options: {
+                                responsive: true,
                                 plugins: {
                                     title: {
                                         display: true,
@@ -215,6 +190,7 @@ function App() {
                                 }]
                             },
                             options: {
+                                responsive: true,
                                 plugins: {
                                     title: {
                                         display: true,
@@ -240,6 +216,10 @@ function App() {
                                     data: value.map(d => d.event_count),
                                     backgroundColor: 'blue'
                                 }]
+                            },
+                            options: {
+                                responsive: true,
+
                             }
                         };
                         break;
@@ -251,10 +231,11 @@ function App() {
 
                         // Convert dates to Date objects and sort them along with user counts
                         const sortedUserData = userData
-                            .map(item => ({
-                                date: new Date(item.signup_day?.value ?? 'Invalid Date'),
-                                count: item.unique_user_count ?? 0
-                            }))
+                            .map(item => {
+                                const date = new Date(item.signup_day?.value ?? 'Invalid Date');
+                                return isValidDate(date) ? { date, count: item.unique_user_count ?? 0 } : null;
+                            })
+                            .filter(item => item !== null) // Filter out invalid dates
                             .sort((a, b) => a.date - b.date);
 
                         // Extract sorted signup days and user counts
@@ -275,6 +256,7 @@ function App() {
                                 }]
                             },
                             options: {
+                                responsive: true,
                                 scales: {
                                     y: {
                                         beginAtZero: true
@@ -338,6 +320,7 @@ function App() {
                                 }]
                             },
                             options: {
+                                responsive: true,
                                 scales: {
                                     y: {
                                         beginAtZero: true
