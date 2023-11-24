@@ -8,6 +8,7 @@ function App() {
     const [data, setData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     const chartRefs = useRef({
         userActivityOverTime: React.createRef(),
@@ -17,6 +18,17 @@ function App() {
         technology: React.createRef(),
         behaviorFlow: React.createRef()
     });
+
+    const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+    };
+
+    useEffect(() => {
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const chartInstances = useRef({});
 
@@ -114,6 +126,11 @@ function App() {
                                 }
                             }
                         };
+                        if (windowWidth < 768) {
+                            chartConfig.options.plugins.tooltip.callbacks.label = (context) => `${context.label}`;
+                            chartConfig.options.plugins.title.font.size = 14;
+                            chartConfig.options.plugins.legend.labels.font.size = 10;
+                        }
                         break;
 
                     case "technology":
@@ -147,6 +164,20 @@ function App() {
                                 }
                             }
                         };
+                        if (windowWidth < 768) {
+                            // Simplify tooltip content for smaller screens
+                            chartConfig.options.plugins.tooltip.callbacks.label = (context) => `${context.label}: ${context.raw}`;
+
+                            // Adjust the font size for the title and the legend labels
+                            chartConfig.options.plugins.title.font.size = 14;
+                            chartConfig.options.plugins.legend.labels.font.size = 10;
+
+                            // Optionally, hide labels for smaller segments to reduce clutter
+                            chartConfig.options.plugins.legend.labels.filter = (legendItem, data) => {
+                                const value = data.datasets[0].data[legendItem.index];
+                                return value > 0.05; // Set a suitable threshold value
+                            };
+                        }
                         break;
 
                     case "behaviorFlow":
@@ -175,6 +206,20 @@ function App() {
                                 }
                             }
                         };
+                        if (windowWidth < 768) {
+                            // Reduce the font size for the title and tooltips
+                            chartConfig.options.plugins.title.font.size = 14;
+                            chartConfig.options.plugins.tooltip.bodyFont.size = 12;
+
+                            // Adjust the axis labels for better readability
+                            chartConfig.options.scales.x.ticks.maxRotation = 45;
+                            chartConfig.options.scales.x.ticks.minRotation = 45;
+                            chartConfig.options.scales.x.ticks.font.size = 10;
+
+                            // Reduce the number of ticks on the x-axis to avoid overcrowding
+                            chartConfig.options.scales.x.ticks.autoSkip = true;
+                            chartConfig.options.scales.x.ticks.maxTicksLimit = 5;
+                        }
                         break;
 
 
@@ -229,27 +274,30 @@ function App() {
                         // Assuming 'value' contains the array of user data
                         const userData = Array.isArray(value) ? value : [];
 
-                        // Convert dates to Date objects and sort them along with user counts
-                        const sortedUserData = userData
-                            .map(item => {
-                                const date = new Date(item.signup_day?.value ?? 'Invalid Date');
-                                return isValidDate(date) ? { date, count: item.unique_user_count ?? 0 } : null;
-                            })
-                            .filter(item => item !== null) // Filter out invalid dates
-                            .sort((a, b) => a.date - b.date);
+                        // Group data into date ranges (e.g., weekly)
+                        const groupedData = {};
+                        userData.forEach(item => {
+                            const date = new Date(item.signup_day?.value ?? 'Invalid Date');
+                            if (isValidDate(date)) {
+                                // Format date to the beginning of the week
+                                const weekStart = new Date(date.setDate(date.getDate() - date.getDay()));
+                                const weekLabel = weekStart.toISOString().split('T')[0]; // Only show the starting date of the week
 
-                        // Extract sorted signup days and user counts
-                        const sortedSignupDays = sortedUserData.map(item => item.date.toISOString().split('T')[0]);
-                        const sortedUniqueUserCounts = sortedUserData.map(item => item.count);
+                                groupedData[weekLabel] = (groupedData[weekLabel] || 0) + (item.unique_user_count ?? 0);
+                            }
+                        });
 
-                        // Define chartConfig for 'user' based on sorted data
+                        const dateLabels = Object.keys(groupedData).sort((a, b) => new Date(a) - new Date(b));
+                        const userCounts = dateLabels.map(label => groupedData[label]);
+
+                        // Define chartConfig for 'user' based on grouped data
                         chartConfig = {
-                            type: 'bar',
+                            type: 'bar', // Vertical bar chart
                             data: {
-                                labels: sortedSignupDays,
+                                labels: dateLabels, // Use the simplified date labels
                                 datasets: [{
                                     label: 'Unique User Logins',
-                                    data: sortedUniqueUserCounts,
+                                    data: userCounts,
                                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                                     borderColor: 'rgba(54, 162, 235, 1)',
                                     borderWidth: 1
@@ -257,23 +305,33 @@ function App() {
                             },
                             options: {
                                 responsive: true,
+                                maintainAspectRatio: false, // This helps to maintain the aspect ratio on different screen sizes
                                 scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            autoSkip: true,
+                                            maxRotation: 0, // Keep labels horizontal
+                                            minRotation: 0,
+                                            padding: 10
+                                        }
+                                    },
                                     y: {
-                                        beginAtZero: true
+                                        beginAtZero: true,
+                                        ticks: {
+                                            padding: 10
+                                        }
                                     }
                                 },
                                 plugins: {
                                     title: {
                                         display: true,
-                                        text: 'Unique User Logins Per Day'
+                                        text: 'Unique User Logins Per Week'
                                     }
                                 }
                             }
                         };
                         break;
-
-
-
 
                     case "userActivityOverTime":
                         const activityByDate = {};
@@ -321,9 +379,22 @@ function App() {
                             },
                             options: {
                                 responsive: true,
+                                maintainAspectRatio: false, // Add this to maintain aspect ratio
                                 scales: {
                                     y: {
-                                        beginAtZero: true
+                                        beginAtZero: true,
+                                        ticks: {
+                                            padding: 10 // Add padding for the labels
+                                        }
+                                    },
+                                    x: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            autoSkip: true, // Enable auto-skip so it doesn't show all labels
+                                            maxRotation: 45, // Angle to slant the labels if shown
+                                            minRotation: 45,
+                                            padding: 10 // Add padding for the labels
+                                        }
                                     }
                                 },
                                 plugins: {

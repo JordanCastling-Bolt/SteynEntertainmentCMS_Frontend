@@ -15,11 +15,11 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* CSS for smaller screens */
 @media screen and (max-width: 768px) {
   .Dashboard div,
   .chart-container {
     width: calc(50% - 40px); /* For two charts in a row */
+    min-height: 400px; /* Set a minimum height */
   }
 }
 
@@ -27,7 +27,13 @@
   .Dashboard div,
   .chart-container {
     width: calc(100% - 40px); /* For one chart per row */
+    min-height: 400px; /* Set a minimum height */
   }
+}
+
+/* Add min-height for chart containers */
+.chart-container {
+  min-height: 300px; /* Adjust this value as needed */
 }
 
 .Dashboard div:hover {
