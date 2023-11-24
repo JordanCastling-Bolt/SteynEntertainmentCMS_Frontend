@@ -186,7 +186,7 @@ const NewsArticle = () => {
 
   return (
     <div className={styles["news-article-container"]}>
-      <div className="left-column">
+      <div className={styles["left-column"]}>
         <h3>Existing Articles</h3>
         {articles.map(article => (
           <div key={article.id}>
@@ -239,7 +239,7 @@ const NewsArticle = () => {
       {feedback && <div>{feedback}</div>}
       </div>
       <div className={styles["news-article-container"]}>
-        <div className="right-column">
+        <div className={styles["right-column"]}>
           <h3>Add New Article</h3>
           <form onSubmit={handleSubmit}>
             <div>

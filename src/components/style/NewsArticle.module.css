@@ -1,5 +1,6 @@
 .news-article-container {
     display: flex;
+    flex-direction: row; /* Default is row */
     justify-content: space-between;
     align-items: flex-start;
     max-width: 100%;
@@ -12,10 +13,24 @@
 }
 
 .left-column, .right-column {
-    flex: 1;
+    flex: 1; /* Equal space distribution */
     padding: 0 20px;
+    margin: 10px; /* Add some margin for separation */
 }
 
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .news-article-container {
+        flex-direction: column; /* Stack columns vertically */
+    }
+    .left-column, .right-column {
+        flex: none; /* Override flex to none */
+        width: 100%; /* Full width for smaller screens */
+        margin: 10px 0; /* Adjust margin for vertical layout */
+    }
+}
+
+/* Additional Styling */
 .news-article-container h2 {
     font-size: 28px;
     margin-bottom: 25px;

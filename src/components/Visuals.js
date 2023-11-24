@@ -23,50 +23,87 @@ const Visuals = () => {
     const [events, setEvents] = useState([]);
     const filteredEvents = events.filter(event => event.category === visualCategory);
     const [currentVisualIndex, setCurrentVisualIndex] = useState(0);
+    const [lightboxVisible, setLightboxVisible] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    const categoryPaths = {
+        eventsAndTouring: 'pLsA5o87UFtGtDyJfkan/eventsAndTouring',
+        inTheCity: 'H5Pm9v6RcRh8EjqUna7N/inTheCity',
+        rockingTheDaisies: 'vKsAOo87UEtGiDyGfvIf/rockingTheDaisies',
+    };
+    const openLightbox = (imageSrc) => {
+        setSelectedImage(imageSrc);
+        setLightboxVisible(true);
+    };
 
     useEffect(() => {
         const fetchEvents = async () => {
+            console.log('Current visual category ID:', visualCategory); // Debugging log
+
             if (!visualCategory) {
                 setEvents([]);
                 return;
             }
-            const eventsQuery = query(collection(db, 'Events'), where('category', '==', visualCategory));
-            const eventsSnapshot = await getDocs(eventsQuery);
-            const eventsList = eventsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            setEvents(eventsList);
+
+            try {
+                const eventsQuery = query(collection(db, 'Events'), where('category', '==', visualCategory));
+                const eventsSnapshot = await getDocs(eventsQuery);
+
+                if (eventsSnapshot.empty) {
+                    console.log('No matching documents.'); // Debugging log
+                    setEvents([]);
+                    return;
+                }
+
+                const eventsList = eventsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                setEvents(eventsList);
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                setFeedback(`Error fetching events: ${error.message}`);
+            }
         };
         fetchEvents();
     }, [visualCategory]);
 
+
     useEffect(() => {
-        const fetchVisuals = async () => {
+        const fetchVisualsFromStorage = async () => {
             if (!visualCategory) {
                 setVisuals([]);
                 return;
             }
 
-            const visualsQuery = query(
-                collection(db, 'Visuals'),
-                where('category', '==', visualCategory),
-                orderBy('title'),
-                limit(PAGE_SIZE)
-            );
+            // Get the correct path from the categoryPaths mapping
+            const path = `visuals/${categoryPaths[visualCategory] || ''}`;
+
+            if (!path) {
+                console.error('Invalid visual category:', visualCategory);
+                setFeedback(`Invalid visual category: ${visualCategory}`);
+                return;
+            }
+
+            const visualsRef = ref(storage, path);
 
             try {
-                const visualsSnapshot = await getDocs(visualsQuery);
-                const visualsList = visualsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                const listResult = await listAll(visualsRef);
+                const urls = await Promise.all(
+                    listResult.items.map((itemRef) => getDownloadURL(itemRef))
+                );
+
+                // Update the state with the URLs of the visuals
+                const visualsList = urls.map((url) => ({ media: url }));
                 setVisuals(visualsList);
-                if (visualsSnapshot.docs.length > 0) {
-                    setLastVisible(visualsSnapshot.docs[visualsSnapshot.docs.length - 1]);
-                }
             } catch (error) {
-                console.error('Error fetching visuals:', error);
+                console.error('Error fetching visuals from storage:', error);
                 setFeedback(`Error fetching visuals: ${error.message}`);
             }
         };
 
-        fetchVisuals();
+        fetchVisualsFromStorage();
     }, [visualCategory]);
+
+
+
 
     const nextVisual = () => {
         setCurrentVisualIndex(prevIndex => (prevIndex + 1) % visuals.length);
@@ -156,36 +193,31 @@ const Visuals = () => {
             return <p>No visuals available.</p>;
         }
 
-        const currentVisual = visuals[currentVisualIndex];
-        if (!currentVisual || !currentVisual.media) {
-            return <p>Visual data is incomplete.</p>;
-        }
+        return (
+            <div className={styles["gallery-container"]}>
+                {visuals.map((visual, index) => (
+                    <div key={index} className={styles["gallery-item"]} onClick={() => openLightbox(visual.media)}>
+                        <img src={visual.media} alt={`Visual ${index}`} />
+                    </div>
+                ))}
+            </div>
+        );
+    };
+    const renderLightbox = () => {
+        if (!lightboxVisible) return null;
 
         return (
-            <>
-                <img
-                    src={currentVisual.media}
-                    alt={currentVisual.title || 'Visual'}
-                    style={{
-                        maxWidth: '200px',
-                        maxHeight: '200px',
-                        display: 'block',
-                        marginLeft: 'auto',
-                        marginRight: 'auto'
-                    }}
-                />
-                <h3>{currentVisual.title}</h3>
-                <p>Category: {currentVisual.category}</p>
-                <button onClick={() => handleDeleteVisual(currentVisual.id)}>Delete</button>
-                <button onClick={prevVisual}>Previous</button>
-                <button onClick={nextVisual}>Next</button>
-            </>
+            <div className={styles["lightbox"]} onClick={() => setLightboxVisible(false)}>
+                <img src={selectedImage} alt="Enlarged visual" />
+            </div>
         );
     };
 
+
     return (
-        <div className={styles['visuals-container']}>
-            <div className={styles['form-column']}>
+        <div className={styles["visuals-container"]}>
+            <div className={styles["form-column"]}>
+            {renderLightbox()}
                 {feedback && <div>{feedback}</div>}
                 <form onSubmit={handleAddVisual}>
                     <label>
