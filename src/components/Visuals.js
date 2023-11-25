@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { uploadBytesResumable, getDownloadURL, ref, getStorage, listAll } from 'firebase/storage';
+import { uploadBytesResumable, getDownloadURL, ref, getStorage, listAll, deleteObject } from 'firebase/storage';
 import { db } from '../firebase';
 import { storage } from '../firebase';
 import { addDoc, collection, getDocs, query, orderBy, limit, startAfter, where, deleteDoc, doc } from 'firebase/firestore';
@@ -25,14 +25,17 @@ const Visuals = () => {
     const [currentVisualIndex, setCurrentVisualIndex] = useState(0);
     const [lightboxVisible, setLightboxVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedImageId, setSelectedImageId] = useState(null);
 
     const categoryPaths = {
         eventsAndTouring: 'pLsA5o87UFtGtDyJfkan/eventsAndTouring',
         inTheCity: 'H5Pm9v6RcRh8EjqUna7N/inTheCity',
         rockingTheDaisies: 'vKsAOo87UEtGiDyGfvIf/rockingTheDaisies',
     };
-    const openLightbox = (imageSrc) => {
+    const openLightbox = (imageSrc, imageId) => {
+        console.log("Opening lightbox for image ID:", imageId);  // Debugging log   
         setSelectedImage(imageSrc);
+        setSelectedImageId(imageId);
         setLightboxVisible(true);
     };
 
@@ -81,17 +84,21 @@ const Visuals = () => {
                 setFeedback(`Invalid visual category: ${visualCategory}`);
                 return;
             }
-
             const visualsRef = ref(storage, path);
 
             try {
                 const listResult = await listAll(visualsRef);
-                const urls = await Promise.all(
-                    listResult.items.map((itemRef) => getDownloadURL(itemRef))
+                const visualsList = await Promise.all(
+                    listResult.items.map(async (itemRef, index) => {
+                        const url = await getDownloadURL(itemRef);
+                        return {
+                            id: itemRef.name, // or `index` or any other unique identifier
+                            media: url
+                        };
+                    })
                 );
-
-                // Update the state with the URLs of the visuals
-                const visualsList = urls.map((url) => ({ media: url }));
+                // Define visualsList here, inside the try block
+                console.log("Visuals fetched:", visualsList); // Now visualsList is defined
                 setVisuals(visualsList);
             } catch (error) {
                 console.error('Error fetching visuals from storage:', error);
@@ -162,17 +169,39 @@ const Visuals = () => {
         }
     };
 
-    const handleDeleteVisual = async (id) => {
+    const handleDeleteVisual = async () => {
+        console.log("Deleting image with ID:", selectedImageId);  // Debugging log
+    
+        if (!selectedImageId) {
+            setFeedback('No image selected for deletion.');
+            return;
+        }
+    
         try {
-            await deleteDoc(doc(db, 'Visuals', id));
-            const updatedVisuals = visuals.filter(visual => visual.id !== id);
+            // Step 1: Delete the document from Firestore
+            await deleteDoc(doc(db, 'Visuals', selectedImageId));
+    
+            // Step 2: Delete the corresponding file from Firebase Storage
+            // Construct the path using categoryPaths mapping
+            const storagePath = `visuals/${categoryPaths[visualCategory]}/${selectedImageId}`;
+            const fileRef = ref(storage, storagePath);
+            await deleteObject(fileRef);
+    
+            // Update visuals state
+            const updatedVisuals = visuals.filter(visual => visual.id !== selectedImageId);
             setVisuals(updatedVisuals);
+    
+            setLightboxVisible(false);
+            setSelectedImage(null);
+            setSelectedImageId(null);
+    
             setFeedback('Visual deleted successfully!');
         } catch (error) {
             console.error('Error deleting visual:', error);
             setFeedback(`Error deleting visual: ${error.message}`);
         }
-    };
+    };    
+
 
     const addVisualToFirestore = async (downloadURL) => {
         try {
@@ -192,32 +221,38 @@ const Visuals = () => {
         if (visuals.length === 0) {
             return <p>No visuals available.</p>;
         }
-
+    
         return (
             <div className={styles["gallery-container"]}>
-                {visuals.map((visual, index) => (
-                    <div key={index} className={styles["gallery-item"]} onClick={() => openLightbox(visual.media)}>
-                        <img src={visual.media} alt={`Visual ${index}`} />
+                {visuals.map((visual) => (
+                    <div key={visual.id} className={styles["gallery-item"]} 
+                         onClick={() => openLightbox(visual.media, visual.id)}>
+                        <img src={visual.media} alt={`Visual ${visual.id}`} />
                     </div>
                 ))}
             </div>
         );
     };
+
     const renderLightbox = () => {
         if (!lightboxVisible) return null;
-
+    
         return (
             <div className={styles["lightbox"]} onClick={() => setLightboxVisible(false)}>
-                <img src={selectedImage} alt="Enlarged visual" />
+                <div className={styles["lightbox-content"]}>
+                    <img src={selectedImage} alt="Enlarged visual" />
+                    <button className={styles["delete-button"]} onClick={handleDeleteVisual}>Delete Image</button>
+                </div>
             </div>
         );
     };
+    
 
 
     return (
         <div className={styles["visuals-container"]}>
             <div className={styles["form-column"]}>
-            {renderLightbox()}
+                {renderLightbox()}
                 {feedback && <div>{feedback}</div>}
                 <form onSubmit={handleAddVisual}>
                     <label>
@@ -241,7 +276,6 @@ const Visuals = () => {
                     <br />
                     <label>
                         Event:
-
                         <select value={selectedEvent ? selectedEvent.id : ''} onChange={handleEventChange} disabled={!visualCategory}>
                             <option value="">Select Event</option>
                             {events.map(event => (

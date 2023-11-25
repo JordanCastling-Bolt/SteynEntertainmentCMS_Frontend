@@ -1,48 +1,42 @@
 .news-article-container {
     display: flex;
-    flex-direction: row; /* Default is row */
+    flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
     max-width: 100%;
     margin: 20px auto;
     padding: 20px;
-    background-color: #ffffff;
+    background-color: var(--white-color);
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--box-shadow);
+    color: var(--secondary-color); /* Sets default text color for the container */
 }
 
 .left-column, .right-column {
-    flex: 1; /* Equal space distribution */
+    flex: 1;
     padding: 0 20px;
-    margin: 10px; /* Add some margin for separation */
+    margin: 10px;
 }
 
-/* Responsive design for smaller screens */
 @media (max-width: 768px) {
     .news-article-container {
-        flex-direction: column; /* Stack columns vertically */
+        flex-direction: column;
     }
     .left-column, .right-column {
-        flex: none; /* Override flex to none */
-        width: 100%; /* Full width for smaller screens */
-        margin: 10px 0; /* Adjust margin for vertical layout */
+        flex: none;
+        width: 100%;
+        margin: 10px 0;
     }
 }
 
-/* Additional Styling */
 .news-article-container h2 {
     font-size: 28px;
     margin-bottom: 25px;
     font-weight: 600;
-    color: #333;
+    color: var(--secondary-color);
 }
-.article-p .ql-container.ql-snow {
-    font-size: 28px;
-    margin-bottom: 25px;
-    font-weight: 600;
-    color: #333;
-}
+
 .news-article-container input[type="text"],
 .news-article-container input[type="file"],
 .news-article-container button {
@@ -52,19 +46,20 @@
     border: 1px solid #e0e0e0;
     border-radius: 6px;
     font-size: 16px;
+    color: var(--secondary-color);
 }
 
 .news-article-container button {
     cursor: pointer;
-    background-color: #4a90e2;
-    color: #fff;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
     border: none;
     transition: background-color 0.3s;
     font-weight: 600;
 }
 
 .news-article-container button:hover {
-    background-color: #357ab7;
+    background-color: #ffff00; /* Adjust if needed */
 }
 
 .news-article-container img {
@@ -78,7 +73,7 @@
     margin-top: 20px;
     font-size: 20px;
     font-weight: 500;
-    color: #444;
+    color: var(--secondary-color);
 }
 
 .news-article-container .ql-editor {
@@ -92,14 +87,13 @@
     margin-bottom: 30px;
 }
 
-/* For Labels */
 .news-article-container label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
+    color: var(--secondary-color);
 }
 
-/* For Textarea */
 .news-article-container textarea {
     width: 100%;
     min-height: 100px;
@@ -110,7 +104,6 @@
     margin-bottom: 20px;
 }
 
-/* For Select Boxes */
 .news-article-container select {
     width: 100%;
     padding: 12px 15px;
@@ -120,21 +113,18 @@
     margin-bottom: 20px;
 }
 
-/* For Checkboxes and Radios */
 .news-article-container input[type="checkbox"],
 .news-article-container input[type="radio"] {
     margin-right: 5px;
 }
 
-/* For Checkbox and Radio Labels */
 .news-article-container .checkbox-label,
 .news-article-container .radio-label {
     margin-right: 15px;
 }
+
 .feedback-container {
-    height: 50px; /* Reserve enough space for one line of text */
-    margin-bottom: 20px; /* Add some margin for spacing */
-    color: rgb(186, 192, 19); /* Optional: Color for the feedback message */
-    /* Add other styling as needed */
-  }
-  
+    height: 50px;
+    margin-bottom: 20px;
+    color: var(--error-color);
+}

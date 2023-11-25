@@ -16,6 +16,7 @@ function App() {
   const [activeSection, setActiveSection] = useState('Dashboard');
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const auth = getAuth();
@@ -65,15 +66,19 @@ function App() {
     });
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   const updateRole = async (uid, newRole) => {
     const db = getFirestore();
     const userRef = doc(db, 'Users', uid);
-  
+
     try {
       await updateDoc(userRef, {
         role: newRole
       });
-  
+
       // Update the allUsers state to reflect the role change
       setAllUsers(prevUsers => prevUsers.map(user => {
         if (user.id === uid) {
@@ -81,7 +86,7 @@ function App() {
         }
         return user;
       }));
-  
+
     } catch (error) {
       console.error("Error updating role:", error);
       // Optionally, handle the error (e.g., show a notification)
@@ -105,29 +110,40 @@ function App() {
 
   return (
     <div className="App">
-      <aside className="sidebar">
+      <aside className={`sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
+        <button className="sidebar-toggle" onClick={toggleSidebar}>
+          <span className={isSidebarOpen ? 'toggle-icon open' : 'toggle-icon'}></span>
+        </button>
         <div className="user-info">
-          <div className="user-info-details">
-            <img src={logo} alt="Logo" className="sidebar-logo" />
+          <img src={logo} alt="Logo" className="sidebar-logo" />
+          {isSidebarOpen && (
             <div>
               <p className="user-info-welcome">Welcome,</p>
               <h4 className="user-info-name">{userName || user.email}</h4>
             </div>
-          </div>
-          {user && (
+          )}
+          {user && isSidebarOpen && ( 
             <div className="user-info-logout">
               <button onClick={handleLogout}>Logout</button>
             </div>
           )}
         </div>
-
         <ul>
-          <li onClick={() => setActiveSection('Dashboard')}>Dashboard</li>
-          <li onClick={() => setActiveSection('Articles')}>Articles</li>
-          <li onClick={() => setActiveSection('Events')}>Events</li>
-          <li onClick={() => setActiveSection('Visuals')}>Visuals</li>
-          <li onClick={() => setActiveSection('ManageRoles')}>Manage Roles</li>
-
+          <li onClick={() => setActiveSection('Dashboard')}>
+            {isSidebarOpen ? 'Dashboard' : 'D'}
+          </li>
+          <li onClick={() => setActiveSection('Articles')}>
+            {isSidebarOpen ? 'Articles' : 'A'}
+          </li>
+          <li onClick={() => setActiveSection('Events')}>
+            {isSidebarOpen ? 'Events' : 'E'}
+          </li>
+          <li onClick={() => setActiveSection('Visuals')}>
+            {isSidebarOpen ? 'Visuals' : 'V'}
+          </li>
+          <li onClick={() => setActiveSection('ManageRoles')}>
+            {isSidebarOpen ? 'Manage Roles' : 'MR'}
+          </li>
         </ul>
       </aside>
       <main className="main-content">

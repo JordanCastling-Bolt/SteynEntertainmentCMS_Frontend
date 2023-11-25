@@ -12,11 +12,65 @@ body {
 }
 
 .sidebar {
-  width: 250px;
+  width: 250px; /* Adjust as needed */
+  transition: width 0.3s;
   background-color: #2E3A48;
   color: #fff;
   padding: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-toggle {
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none; 
+  color: var(--secondary-color);
+}
+
+.sidebar-toggle:hover {
+  background-color: #ffff00; /* Darker on hover */
+}
+
+.toggle-icon {
+  display: inline-block;
+  width: 20px; /* Width of the icon */
+  height: 2px; /* Height of the icon */
+  background-color: var(--secondary-color); /* Color of the icon */
+  color: var(--secondary-color);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+
+.toggle-icon.open::before,
+.toggle-icon.open::after {
+  position: absolute;
+  top: 50%;
+  transform-origin: center;
+  background-color: white;
+}
+
+.toggle-icon.open::before {
+  width: 20px;
+  height: 2px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.toggle-icon.open::after {
+  width: 20px;
+  height: 2px;
+  transform: translateY(-50%) rotate(-135deg);
+}
+
+.sidebar.collapsed {
+  width: 50px; /* Adjust as needed */
+  /* Adjust other styles for collapsed state if needed */
 }
 
 .sidebar ul {
@@ -40,6 +94,11 @@ body {
   flex: 1;
   padding: 20px;
   background-color: #F4F4F4;
+  transition: margin-left 0.3s;
+}
+
+.sidebar.collapsed ~ .main-content {
+  margin-left: 50px; /* Adjust based on collapsed sidebar width */
 }
 
 h2 {

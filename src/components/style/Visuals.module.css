@@ -1,4 +1,3 @@
-
 .Visuals {
   width: 100%;
   display: flex;
@@ -11,19 +10,19 @@
   display: flex;                    
   flex-direction: row;
   justify-content: space-between;
-}
-.main-content {
-  display: flex;
-  flex-direction: row; 
-  flex: 1;              
+  background-color: var(--white-color);
+  border-radius: 10px;
+  box-shadow: var(--box-shadow);
+  padding: 20px;
+  margin: 20px auto;
 }
 
 .slider-column, .form-column {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-  background: #ffffff; 
+  box-shadow: var(--box-shadow);
+  background: var(--white-color);
   padding: 20px;
-  border-radius: 10px; 
-  overflow: hidden; /* Prevents child elements from overflowing */
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .slider-column {
@@ -40,7 +39,7 @@ form label {
   display: block;
   margin-bottom: 10px;
   font-weight: 600;
-  color: #555;
+  color: var(--secondary-color);
 }
 
 input[type="text"], input[type="file"], select, textarea {
@@ -49,65 +48,29 @@ input[type="text"], input[type="file"], select, textarea {
   margin-bottom: 20px;
   border: 1px solid #d1d3d4;
   border-radius: 5px;
-  transition: border-color 0.3s; 
+  transition: border-color 0.3s;
 }
 
 input[type="text"]:focus, input[type="file"]:focus, select:focus, textarea:focus {
-  border-color: #007BFF;
+  border-color: var(--primary-color);
   outline: none;
 }
 
 button {
-  background-color: #007BFF;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
   border: none;
   padding: 10px 25px;
   border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  box-shadow: var(--box-shadow);
   transition: all 0.3s;
 }
 
 button:hover {
-  background-color: #0056b3;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); 
+  background-color: #ffff00; /* Adjust hover color if needed */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
 }
 
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
-  border: none; 
-  background-color: #000000;
-  padding: 15px;
-  margin: 15px 0;
-  border-radius: 10px; 
-  transition: transform 0.3s; 
-}
-
-li:hover {
-  transform: translateY(-5px); 
-}
-
-li img, li video {
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 100%; /* Ensuring media doesn't overflow its container */
-}
-
-li h3 {
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: #797979; 
-}
-
-li p {
-  margin-bottom: 10px;
-}
-
-li button {
-  margin-top: 10px;
-}
 .gallery-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -115,35 +78,64 @@ li button {
 }
 
 .gallery-item {
-  max-height: 150px; /* Adjust as needed */
+  max-height: 150px;
   width: 100%;
   margin-bottom: 10px;
-  cursor: pointer; /* Indicates that an item is clickable */
+  cursor: pointer;
 }
 
 .gallery-item img {
   height: 100%;
-  width: auto; /* Maintain aspect ratio */
-  max-width: 100%; /* Ensures image doesn't exceed its container */
-  object-fit: contain; /* Ensures the full image is shown */
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
+
 .lightbox {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure it's above other content */
+  z-index: 1000;
+  padding: 20px;
 }
 
 .lightbox img {
-  max-height: 80%;
-  max-width: 80%;
+  max-height: 80vh;
+  max-width: 90vw;
+  margin-bottom: 10px;
   box-shadow: 0 0 10px #fff;
   border: 4px solid #fff;
+  object-fit: contain;
 }
 
+.lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 100%;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.delete-button {
+  background-color: #FF5733;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  width: 200px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: center;
+}
+
+.delete-button:hover {
+  background-color: #E04128;
+}
