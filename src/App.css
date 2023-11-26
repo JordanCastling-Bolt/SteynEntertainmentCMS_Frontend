@@ -78,12 +78,16 @@ body {
   padding: 0;
 }
 
-.sidebar li {
+.sidebar li.sidebar-item {
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 10px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
 }
 
 .sidebar li:hover {
@@ -99,6 +103,10 @@ body {
 
 .sidebar.collapsed ~ .main-content {
   margin-left: 50px; /* Adjust based on collapsed sidebar width */
+}
+
+.sidebar li svg {
+  font-size: 20px; /* Adjust icon size */
 }
 
 h2 {
@@ -202,4 +210,36 @@ div.feedback {
   border-radius: 4px;
   margin-bottom: 20px;
   color: #333;
+}
+
+.tooltip {
+  visibility: hidden;
+  background-color: #555;
+  color: white;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+  left: 100%; /* Position to the right of the icon */
+  margin-left: 10px; /* Space between icon and tooltip */
+  white-space: nowrap; /* Prevents text from wrapping */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.sidebar.collapsed .sidebar-item:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
 }

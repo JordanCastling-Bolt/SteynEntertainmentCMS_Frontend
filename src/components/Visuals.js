@@ -110,39 +110,18 @@ const Visuals = () => {
     }, [visualCategory]);
 
 
-
-
-    const nextVisual = () => {
-        setCurrentVisualIndex(prevIndex => (prevIndex + 1) % visuals.length);
-    }
-
-    const prevVisual = () => {
-        setCurrentVisualIndex(prevIndex => (prevIndex - 1 + visuals.length) % visuals.length);
-    }
-
-    const handleEventChange = (e) => {
-        if (!visualCategory) {
-            setFeedback('Please select a category first.');
-            return;
-        }
-        const selectedEventId = e.target.value;
-        const selectedEvent = events.find(event => event.id === selectedEventId);
-        setSelectedEvent(selectedEvent);
-    };
-
     const handleAddVisual = async (e) => {
         e.preventDefault();
-        if (!visualCategory.trim() || !selectedEvent) {
-            setFeedback('Please select both a category and an event for the visual.');
+        if (!visualCategory.trim()) {
+            setFeedback('Please select a category the visual.');
             return;
         }
-        const title = visualTitle;
-        const category = visualCategory;
+        const uploadPath = `visuals/${categoryPaths[visualCategory] || ''}`;
 
         if (visualFiles && visualFiles.length > 0) {
             for (let i = 0; i < visualFiles.length; i++) {
                 const visualFile = visualFiles[i];
-                const storageRef = ref(storage, `visuals/${selectedEvent.id}/${category}/${visualFile.name}`);
+                const storageRef = ref(storage, `${uploadPath}/${visualFile.name}`);
                 const uploadTask = uploadBytesResumable(storageRef, visualFile);
 
                 uploadTask.on('state_changed',
@@ -171,36 +150,36 @@ const Visuals = () => {
 
     const handleDeleteVisual = async () => {
         console.log("Deleting image with ID:", selectedImageId);  // Debugging log
-    
+
         if (!selectedImageId) {
             setFeedback('No image selected for deletion.');
             return;
         }
-    
+
         try {
             // Step 1: Delete the document from Firestore
             await deleteDoc(doc(db, 'Visuals', selectedImageId));
-    
+
             // Step 2: Delete the corresponding file from Firebase Storage
             // Construct the path using categoryPaths mapping
             const storagePath = `visuals/${categoryPaths[visualCategory]}/${selectedImageId}`;
             const fileRef = ref(storage, storagePath);
             await deleteObject(fileRef);
-    
+
             // Update visuals state
             const updatedVisuals = visuals.filter(visual => visual.id !== selectedImageId);
             setVisuals(updatedVisuals);
-    
+
             setLightboxVisible(false);
             setSelectedImage(null);
             setSelectedImageId(null);
-    
+
             setFeedback('Visual deleted successfully!');
         } catch (error) {
             console.error('Error deleting visual:', error);
             setFeedback(`Error deleting visual: ${error.message}`);
         }
-    };    
+    };
 
 
     const addVisualToFirestore = async (downloadURL) => {
@@ -208,7 +187,6 @@ const Visuals = () => {
             await addDoc(collection(db, 'Visuals'), {
                 title: visualTitle,
                 media: downloadURL,
-                eventId: selectedEvent.id,
                 category: visualCategory,
             });
             setFeedback('Visual added successfully to Firestore!');
@@ -221,12 +199,12 @@ const Visuals = () => {
         if (visuals.length === 0) {
             return <p>No visuals available.</p>;
         }
-    
+
         return (
             <div className={styles["gallery-container"]}>
                 {visuals.map((visual) => (
-                    <div key={visual.id} className={styles["gallery-item"]} 
-                         onClick={() => openLightbox(visual.media, visual.id)}>
+                    <div key={visual.id} className={styles["gallery-item"]}
+                        onClick={() => openLightbox(visual.media, visual.id)}>
                         <img src={visual.media} alt={`Visual ${visual.id}`} />
                     </div>
                 ))}
@@ -236,7 +214,7 @@ const Visuals = () => {
 
     const renderLightbox = () => {
         if (!lightboxVisible) return null;
-    
+
         return (
             <div className={styles["lightbox"]} onClick={() => setLightboxVisible(false)}>
                 <div className={styles["lightbox-content"]}>
@@ -246,9 +224,6 @@ const Visuals = () => {
             </div>
         );
     };
-    
-
-
     return (
         <div className={styles["visuals-container"]}>
             <div className={styles["form-column"]}>
@@ -271,18 +246,6 @@ const Visuals = () => {
                             <option value="eventsAndTouring">Events and Touring</option>
                             <option value="rockingTheDaisies">Rocking the Daisies</option>
                             <option value="inTheCity">In the City</option>
-                        </select>
-                    </label>
-                    <br />
-                    <label>
-                        Event:
-                        <select value={selectedEvent ? selectedEvent.id : ''} onChange={handleEventChange} disabled={!visualCategory}>
-                            <option value="">Select Event</option>
-                            {events.map(event => (
-                                <option key={event.id} value={event.id}>
-                                    {event.title}
-                                </option>
-                            ))}
                         </select>
                     </label>
                     <br />

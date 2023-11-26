@@ -13,7 +13,6 @@
   background-color: var(--white-color);
   border-radius: 10px;
   box-shadow: var(--box-shadow);
-  padding: 20px;
   margin: 20px auto;
 }
 
@@ -92,7 +91,7 @@ button:hover {
 }
 
 .lightbox {
-  position: fixed;
+  position: flex;
   top: 0;
   left: 0;
   width: 100vw;
@@ -102,7 +101,6 @@ button:hover {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;
 }
 
 .lightbox img {

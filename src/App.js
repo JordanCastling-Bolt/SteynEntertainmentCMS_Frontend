@@ -8,6 +8,8 @@ import { getFirestore, doc, getDoc, collection, getDocs, updateDoc, query, where
 import Dashboard from './components/Dashboard';
 import Visuals from './components/Visuals';
 import { useNavigate } from 'react-router-dom';
+import { FaHome, FaNewspaper, FaCalendarAlt, FaImages, FaUserCog } from 'react-icons/fa'; // Alternative icons
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -122,27 +124,44 @@ function App() {
               <h4 className="user-info-name">{userName || user.email}</h4>
             </div>
           )}
-          {user && isSidebarOpen && ( 
+          {user && isSidebarOpen && (
             <div className="user-info-logout">
               <button onClick={handleLogout}>Logout</button>
             </div>
           )}
         </div>
         <ul>
-          <li onClick={() => setActiveSection('Dashboard')}>
-            {isSidebarOpen ? 'Dashboard' : 'D'}
+          <li className="sidebar-item" onClick={() => setActiveSection('Dashboard')}>
+            <FaHome />
+            {isSidebarOpen && <span>Dashboard</span>}
+            {!isSidebarOpen && <span className="tooltip">Dashboard</span>}
           </li>
-          <li onClick={() => setActiveSection('Articles')}>
-            {isSidebarOpen ? 'Articles' : 'A'}
+          {/* Articles */}
+          <li className="sidebar-item" onClick={() => setActiveSection('Articles')}>
+            <FaNewspaper />
+            {isSidebarOpen && <span>Articles</span>}
+            {!isSidebarOpen && <span className="tooltip">Articles</span>}
           </li>
-          <li onClick={() => setActiveSection('Events')}>
-            {isSidebarOpen ? 'Events' : 'E'}
+
+          {/* Events */}
+          <li className="sidebar-item" onClick={() => setActiveSection('Events')}>
+            <FaCalendarAlt />
+            {isSidebarOpen && <span>Events</span>}
+            {!isSidebarOpen && <span className="tooltip">Events</span>}
           </li>
-          <li onClick={() => setActiveSection('Visuals')}>
-            {isSidebarOpen ? 'Visuals' : 'V'}
+
+          {/* Visuals */}
+          <li className="sidebar-item" onClick={() => setActiveSection('Visuals')}>
+            <FaImages />
+            {isSidebarOpen && <span>Visuals</span>}
+            {!isSidebarOpen && <span className="tooltip">Visuals</span>}
           </li>
-          <li onClick={() => setActiveSection('ManageRoles')}>
-            {isSidebarOpen ? 'Manage Roles' : 'MR'}
+
+          {/* Manage Roles */}
+          <li className="sidebar-item" onClick={() => setActiveSection('ManageRoles')}>
+            <FaUserCog />
+            {isSidebarOpen && <span>Manage Roles</span>}
+            {!isSidebarOpen && <span className="tooltip">Manage Roles</span>}
           </li>
         </ul>
       </aside>
